@@ -1,6 +1,6 @@
 #!/bin/sh
 ## Set variables
-INSTALLFILE="mysql-5.7.31-linux-glibc2.12-x86_64z"
+INSTALLFILE="mysql-5.7.31-linux-glibc2.12-x86_64"
 BASEDIR="/usr/local/mysql"
 DATADIR="/data/mysql_data"
 TMPDIR="/data/mysql_tmp"
@@ -9,7 +9,7 @@ MYSQL_USER="mysql"
 
 # Create a mysql user
 sudo groupadd $MYSQL_USER
-useradd -r -g $MYSQL_USER -s /bin/false $MYSQL_USER
+sudo useradd -r -g $MYSQL_USER -s /bin/false $MYSQL_USER
 
 # Create a my.cnf in "/etc" dir
 sudo bash -c "echo '# 4Core 8GB
@@ -154,8 +154,7 @@ max_allowed_packet = 16M #1024M
 open-files-limit = 65535
 ' > /etc/my.cnf"
 # Decom MySQL binary file
-sudo tar xvfz $INSTALLFILE.tar.gz; \
-  sudo mv $INSTALLFILE /usr/local/mysql
+sudo tar xvfz $INSTALLFILE.tar.gz && sudo mv $INSTALLFILE /usr/local/mysql
 
 # make mysql dirs
 sudo mkdir -p $BASEDIR; \
@@ -169,10 +168,11 @@ sudo touch $LOGDIR/mysql.err; \
   sudo touch $LOGDIR/general_query.log; \
   sudo touch $LOGDIR/slowquery.log
 
-sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR && sudo chown -R mysql.mysql $TMPDIR && chown -R mysql.mysql $LOGDIR
+sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR && sudo chown -R mysql.mysql $TMPDIR && sudo chown -R mysql.mysql $LOGDIR
 
 # install mysql
-sudo cd $BASEDIR && ./bin/mysqld --basedir=$BASEDIR --datadir=$DATADIR --initialize --user=mysql
+sudo cd $BASEDIR
+sudo ./bin/mysqld --basedir=$BASEDIR --datadir=$DATADIR --initialize --user=mysql
 wait
 if [ $? -eq 0 ];then
   echo "OK"
@@ -183,5 +183,6 @@ else
 fi
 
 # start mysql
-sudo cd $BASEDIR && ./bin/mysqld_safe --defaults-file=/etc/my.cnf --user=mysql&
+sudo cd $BASEDIR
+sudo ./bin/mysqld_safe --defaults-file=/etc/my.cnf --user=mysql &
 # get a MySQL temporary password
