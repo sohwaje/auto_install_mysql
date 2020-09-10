@@ -186,10 +186,14 @@ do
 done
 ############################# download MySQL 5.7 ###############################
 echo -e "\t\e[1;32;40m download MySQL 5.7 /usr/local/mysql \e[0m"
+sudo wget -P \
+  /tmp/ https://github.com/sohwaje/bbs/raw/master/mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz
+
 
 ########################## Decom MySQL binary file #############################
 echo -e "\t\e[1;32;40m Decom MySQL binary file \e[0m"
 sleep 1
+cp /tmp/
 sudo tar xvfz $INSTALLFILE.tar.gz && sudo mv $INSTALLFILE /usr/local/mysql
 
 ################################# Set permission ###############################
