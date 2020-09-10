@@ -169,6 +169,8 @@ sudo touch $LOGDIR/mysql.err; \
   sudo touch $LOGDIR/general_query.log; \
   sudo touch $LOGDIR/slowquery.log
 
+sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR && sudo chown -R mysql.mysql $TMPDIR && chown -R mysql.mysql $LOGDIR
+
 # install mysql
 sudo cd $BASEDIR && ./bin/mysqld --basedir=$BASEDIR --datadir=$DATADIR --initialize --user=mysql
 wait
