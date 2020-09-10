@@ -1,17 +1,21 @@
 #!/bin/sh
-## Set variables
+############################## Set variables ###################################
 INSTALLFILE="mysql-5.7.31-linux-glibc2.12-x86_64"
 BASEDIR="/usr/local/mysql"
-DATADIR="/data/mysql_data"
-TMPDIR="/data/mysql_tmp"
-LOGDIR="/data/mysql_log"
+DATADIR="/data"
+MYSQL_DATA="$DATADIR/mysql_data"
+TMPDIR="$DATADIR/mysql_tmp"
+LOGDIR="$DATADIR/mysql_log"
 MYSQL_USER="mysql"
 
-# Create a mysql user
+############################ Create a mysql user ###############################
+echo -e "\t\e[1;32;40m create user for mysql \e[0m"
+sleep 1
 sudo groupadd $MYSQL_USER
 sudo useradd -r -g $MYSQL_USER -s /bin/false $MYSQL_USER
 
-# Create a my.cnf in "/etc" dir
+########################### Create a my.cnf in "/etc" ##########################
+echo -e "\t\e[1;32;40m Create a my.cnf in /etc \e[0m"
 sudo bash -c "echo '# 4Core 8GB
 [client]
 port            = 3306
@@ -24,7 +28,7 @@ socket          = /tmp/mysql.sock
 #default-character-set = utf8mb4
 
 basedir = $BASEDIR
-datadir = $DATADIR
+datadir = $MYSQL_DATA
 tmpdir = $TMPDIR
 
 ## default
@@ -119,14 +123,14 @@ innodb_adaptive_hash_index = 1
 innodb_buffer_pool_size = 4G #200G
 innodb_data_file_path = ibdata1:100M;ibdata2:100M;ibdata3:100M:autoextend #ibdata1:20G;ibdata2:20G;ibdata3:1G:autoextend
 innodb_file_per_table
-innodb_data_home_dir = $DATADIR
+innodb_data_home_dir = $MYSQL_DATA
 
 innodb_flush_log_at_trx_commit = 1
 innodb_io_capacity = 400
 innodb_log_buffer_size = 64M
 innodb_log_file_size = 512M #1024M
 innodb_log_files_in_group = 4
-innodb_log_group_home_dir = $DATADIR
+innodb_log_group_home_dir = $MYSQL_DATA
 innodb_thread_concurrency = 0
 innodb_write_io_threads = 12
 innodb_read_io_threads = 12
@@ -153,35 +157,62 @@ max_allowed_packet = 16M #1024M
 [mysqld_safe]
 open-files-limit = 65535
 ' > /etc/my.cnf"
-# Decom MySQL binary file
+
+################# make mysql dirs if exits /usr/local/mysql ####################
+echo -e "\t\e[1;32;40m make mysql dirs if exits /usr/local/mysql \e[0m"
+sleep 1
+if [ ! -d $BASEDIR ];then
+  echo "make $BASEDIR"
+  sudo mkdir -p $BASEDIR
+else
+  echo "exits $BASEDIR => rm -rf $BASEDIR"
+  sudo rm -rf $BASEDIR
+fi
+
+############################# make others dir ##################################
+echo -e "\t\e[1;32;40m make others dir /usr/local/mysql \e[0m"
+sleep 1
+for dir in $MYSQL_DATA $TMPDIR $LOGDIR $LOGDIR/mysql_binlog
+do
+  sudo mkdir -p $dir
+done
+
+############################# make mysql files #################################
+echo -e "\t\e[1;32;40m make mysql files /usr/local/mysql \e[0m"
+sleep 1
+for file in $LOGDIR/mysql.err $LOGDIR/general_query.log $LOGDIR/slowquery.log
+do
+  sudo touch $file
+done
+############################# download MySQL 5.7 ###############################
+echo -e "\t\e[1;32;40m download MySQL 5.7 /usr/local/mysql \e[0m"
+
+########################## Decom MySQL binary file #############################
+echo -e "\t\e[1;32;40m Decom MySQL binary file \e[0m"
+sleep 1
 sudo tar xvfz $INSTALLFILE.tar.gz && sudo mv $INSTALLFILE /usr/local/mysql
 
-# make mysql dirs
-sudo mkdir -p $BASEDIR; \
-  sudo mkdir -p $DATADIR; \
-  sudo mkdir -p $TMPDIR; \
-  sudo mkdir -p $LOGDIR; \
-  sudo mkdir -p $LOGDIR/mysql_binlog
+################################# Set permission ###############################
+sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR
 
-# make mysql files
-sudo touch $LOGDIR/mysql.err; \
-  sudo touch $LOGDIR/general_query.log; \
-  sudo touch $LOGDIR/slowquery.log
-
-sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR && sudo chown -R mysql.mysql $TMPDIR && sudo chown -R mysql.mysql $LOGDIR
-
-# install mysql
-cd $BASEDIR && sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$DATADIR --initialize --user=mysql
+################################## install mysql ###############################
+clear
+echo -e "\t\e[1;32;40m install mysql....... \e[0m"
+cd $BASEDIR; sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
 wait
 if [ $? -eq 0 ];then
-  echo "OK"
+  echo -e "\t\e[1;32;40m Installed \e[0m"
+  sleep 1
   password=$(grep 'temporary password' $LOGDIR/mysql.err | awk '{print $11}')
 else
   echo "Failed"
   exit 9
 fi
 
-# start mysql
-cd $BASEDIR && sudo ./bin/mysqld_safe --defaults-file=/etc/my.cnf --user=mysql &
-# get a MySQL temporary password
-echo $password
+################################### start mysql ################################
+echo -e "\t\e[1;32;40m Starting MySQL \e[0m"
+cd $BASEDIR; sudo ./bin/mysqld_safe --defaults-file=/etc/my.cnf --user=mysql >/dev/null &
+
+########################### get a MySQL temporary password #####################
+echo -e "\t\e[1;32;40m temporary password \e[0m"
+echo "temporary password is : $password"
