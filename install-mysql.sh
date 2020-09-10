@@ -171,8 +171,7 @@ sudo touch $LOGDIR/mysql.err; \
 sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR && sudo chown -R mysql.mysql $TMPDIR && sudo chown -R mysql.mysql $LOGDIR
 
 # install mysql
-sudo cd $BASEDIR
-sudo ./bin/mysqld --basedir=$BASEDIR --datadir=$DATADIR --initialize --user=mysql
+sudo cd $BASEDIR && sudo "./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$DATADIR --initialize --user=mysql"
 wait
 if [ $? -eq 0 ];then
   echo "OK"
@@ -184,5 +183,6 @@ fi
 
 # start mysql
 sudo cd $BASEDIR
-sudo ./bin/mysqld_safe --defaults-file=/etc/my.cnf --user=mysql &
+sudo "./bin/mysqld_safe --defaults-file=/etc/my.cnf --user=mysql &"
 # get a MySQL temporary password
+echo $password
