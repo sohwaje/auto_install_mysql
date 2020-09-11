@@ -242,29 +242,6 @@ EOF"
 sudo systemctl daemon-reload && sudo systemctl start mysql.server && sudo systemctl enable mysql.server
 }
 
-################################### start mysql ################################
-# start_mysql() {
-#   echo -e "\e[1;32;40m[9] Starting MySQL \e[0m"
-#   cd $BASEDIR
-#   sudo ./bin/mysqld_safe --defaults-file=/etc/my.cnf --user=mysql >/dev/null &
-#   sleep 100
-#   # sudo kill -9 $!
-#   COUNT=100
-#   while [[ $COUNT -gt 0 ]]
-#   do
-#     echo > /dev/tcp/127.0.0.1/3306 >/dev/null
-#     x=$?  # echo의 실행 값을 x에 대입. x의 값은 0 또는 1
-#     let COUNT=COUNT-1
-#   done
-# # if status value is $x 0 OK, else Failed
-#   if [[ $x -eq 0 ]];then
-#     echo -e "\e[1;33;40m [OK] \e[0m"
-#   else
-#     echo -e "\e[1;31;40m [Failed] \e[0m"
-#     exit 9
-#   fi
-#   sudo kill -TERM $! 1>/dev/null 2>&1  # 가장 최근 백그라운에서 실행된 프로세스를 종료한다. 표준 출력, 표준 에러 모두 보여주지 않는다.
-# }
 start_mysql() {
   sudo systemctl start mysql.server
 }
