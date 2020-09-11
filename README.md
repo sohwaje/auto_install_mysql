@@ -24,8 +24,6 @@
 > MySQL PID 파일 생성 경로: MYSQLD_PID_PATH="$DATADIR/mysql_data"
 
 ### [3] my.cnf
-> my.cnf 디폴트 설정 파일. 그대로 사용해도 무방하지만, 환경에 맞게 수정해서 쓰는 것을 권한한다.
+> my.cnf 파일은 MySQL 디폴트 설정 파일. 그대로 사용해도 무방하지만, 환경에 맞게 수정해서 쓰는 것을 권장
 
 > 기본 경로는 /etc/my.cnf
-
-### [4]
