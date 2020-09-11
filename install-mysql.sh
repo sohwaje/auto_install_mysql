@@ -214,7 +214,7 @@ sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR
 ############################### initialize mysql ###############################
 initialize_mysql() {
   clear
-  echo -e "\e[1;32;40m[8] installing MySQL....... \e[0m"
+  echo -e "\e[1;32;40m[8] Wait a few minutes installing MySQL....... \e[0m"
   cd $BASEDIR; sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
   wait
   if [[ -z `cat $LOGDIR/mysql.err | grep -i "\[Error\]"` ]];then
