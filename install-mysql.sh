@@ -235,7 +235,7 @@ start_mysql() {
     echo -e "\e[1;31;40m [Failed] \e[0m"
     exit 9
   fi
-  sudo kill -9 $! >/dev/null
+  sudo kill -9 $! 1>/dev/null 2>&1  # 표준 출력, 표준 에러 모두 보여주지 않는다.
 }
 ########################### get a MySQL temporary password #####################
 
