@@ -7,15 +7,16 @@ MYSQL_DATA="$DATADIR/mysql_data"
 TMPDIR="$DATADIR/mysql_tmp"
 LOGDIR="$DATADIR/mysql_log"
 MYSQL_USER="mysql"
+MYSQLD_PID_PATH="$DATADIR/mysql_data"
 
 ############################ Create a mysql user ###############################
-echo -e "\t\e[1;32;40m create user for mysql \e[0m"
+echo -e "\e[1;32;40m[1] create user for mysql \e[0m"
 sleep 1
 sudo groupadd $MYSQL_USER
 sudo useradd -r -g $MYSQL_USER -s /bin/false $MYSQL_USER
 
 ########################### Create a my.cnf in "/etc" ##########################
-echo -e "\t\e[1;32;40m Create a my.cnf in /etc \e[0m"
+echo -e "\e[1;32;40m[2] Create a my.cnf in /etc \e[0m"
 sudo bash -c "echo '# 4Core 8GB
 [client]
 port            = 3306
@@ -159,17 +160,17 @@ open-files-limit = 65535
 ' > /etc/my.cnf"
 
 ################# make mysql dirs if exits /usr/local/mysql ####################
-echo -e "\t\e[1;32;40m make mysql dirs if exits /usr/local/mysql \e[0m"
+echo -e "\e[1;32;40m[3] make MySQL dirs if exits /usr/local/mysql \e[0m"
 sleep 1
 if [ ! -d $BASEDIR ];then
-  echo "directory exits"
+  echo "it's a MySQL home dir."
 else
   echo "exits $BASEDIR => rm -rf $BASEDIR"
   sudo rm -rf $BASEDIR
 fi
 
 ############################# make others dir ##################################
-echo -e "\t\e[1;32;40m make others dir /usr/local/mysql \e[0m"
+echo -e "\e[1;32;40m[4] make MySQL dir \e[0m"
 sleep 1
 for dir in $MYSQL_DATA $TMPDIR $LOGDIR $LOGDIR/mysql_binlog
 do
@@ -177,45 +178,71 @@ do
 done
 
 ############################# make mysql files #################################
-echo -e "\t\e[1;32;40m make mysql files /usr/local/mysql \e[0m"
+echo -e "\e[1;32;40m[5] make MySQL files in /usr/local/mysql \e[0m"
 sleep 1
 for file in $LOGDIR/mysql.err $LOGDIR/general_query.log $LOGDIR/slowquery.log
 do
   sudo touch $file
 done
 ############################# download MySQL 5.7 ###############################
-echo -e "\t\e[1;32;40m download MySQL 5.7 /usr/local/mysql \e[0m"
+echo -e "\e[1;32;40m[6] download MySQL5.7 \e[0m"
 sudo wget -P \
   /tmp/ https://github.com/sohwaje/bbs/raw/master/mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz
 
 
 ########################## Decom MySQL binary file #############################
-echo -e "\t\e[1;32;40m Decom MySQL binary file \e[0m"
+echo -e "\e[1;32;40m[7] Decom MySQL binary file \e[0m"
 sleep 1
-cp /tmp/
-sudo tar xvfz $INSTALLFILE.tar.gz && sudo mv $INSTALLFILE /usr/local/mysql
+cd /tmp/
+sudo tar xvfz $INSTALLFILE.tar.gz && sudo mv $INSTALLFILE /usr/local/mysql && sudo rm -f $INSTALLFILE.tar.gz
 
 ################################# Set permission ###############################
 sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR
 
-################################## install mysql ###############################
-clear
-echo -e "\t\e[1;32;40m install mysql....... \e[0m"
-cd $BASEDIR; sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
-wait
-if [ $? -eq 0 ];then
-  echo -e "\t\e[1;32;40m Installed \e[0m"
-  sleep 1
-  password=$(grep 'temporary password' $LOGDIR/mysql.err | awk '{print $11}')
-else
-  echo "\t\e[1;31;40m Failed \e[0m 1;31m"
-  exit 9
-fi
-
+############################ initialize mysql func #############################
+initialize_mysql() {
+  clear
+  echo -e "\e[1;32;40m[8] installing MySQL....... \e[0m"
+  cd $BASEDIR; sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
+  wait
+  if [[ -z `cat $LOGDIR/mysql.err | grep -i "\[Error\]"` ]];then
+    echo -e "\e[1;33;40m [Installed] \e[0m"
+    password=$(grep 'temporary password' $LOGDIR/mysql.err | awk '{print $11}')
+    sleep 3
+  else
+    echo -e "\e[1;31;40m [Failed] \e[0m"
+    sleep 1
+    exit 9
+  fi
+}
 ################################### start mysql ################################
-echo -e "\t\e[1;32;40m Starting MySQL \e[0m"
-cd $BASEDIR; sudo ./bin/mysqld_safe --defaults-file=/etc/my.cnf --user=mysql >/dev/null &
-
+start_mysql() {
+  echo -e "\e[1;32;40m[9] Starting MySQL \e[0m"
+  cd $BASEDIR; sudo ./bin/mysqld_safe --defaults-file=/etc/my.cnf --pid-file="$MYSQLD_PID_PATH" --user=mysql >/dev/null &
+  sleep 60
+  sudo kill -9 $!
+  COUNT=50
+  while [[ $COUNT -gt 0 ]]
+  do
+    echo > /dev/tcp/127.0.0.1/3306 >/dev/null
+    x=$?  # echo의 실행 값을 x에 대입. x의 값은 0 또는 1
+    let COUNT=COUNT-1
+  done
+# if status value is $x 0 OK, else Failed
+  if [[ $x -eq 0 ]];then
+    echo -e "\e[1;33;40m [OK] \e[0m"
+  else
+    echo -e "\e[1;31;40m [Failed] \e[0m"
+    exit 9
+  fi
+}
 ########################### get a MySQL temporary password #####################
-echo -e "\t\e[1;32;40m temporary password \e[0m"
-echo "temporary password is : $password"
+
+temp_password() {
+  echo -e "\e[1;32;40m[10] MySQL temporary password \e[0m"
+  echo "temporary password is : $password"
+}
+
+initialize_mysql
+start_mysql
+temp_password
