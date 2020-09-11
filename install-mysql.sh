@@ -254,11 +254,10 @@ ExecStop = /etc/rc.d/init.d/mysql.server stop
 [Install]
 WantedBy=multi-user.target
 EOF"
-sudo systemctl daemon-reload && sudo systemctl start mysql.server && sudo systemctl enable mysql.server
 }
 
 start_mysql() {
-  sudo systemctl start mysql.server
+  sudo systemctl daemon-reload && sudo systemctl start mysql.server && sudo systemctl enable mysql.server
 }
 
 initialize_mysql
