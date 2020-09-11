@@ -219,8 +219,8 @@ initialize_mysql() {
 start_mysql() {
   echo -e "\e[1;32;40m[9] Starting MySQL \e[0m"
   cd $BASEDIR; sudo ./bin/mysqld_safe --defaults-file=/etc/my.cnf --pid-file="$MYSQLD_PID_PATH" --user=mysql >/dev/null &
-  sleep 60
   sudo kill -9 $!
+  sleep 60
   COUNT=50
   while [[ $COUNT -gt 0 ]]
   do
