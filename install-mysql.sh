@@ -9,12 +9,24 @@ LOGDIR="$DATADIR/mysql_log"
 MYSQL_USER="mysql"
 MYSQLD_PID_PATH="$DATADIR/mysql_data"
 
-############################ Create a mysql user ###############################
+############################ Create a mysql group & user #######################
 echo -e "\e[1;32;40m[1] create user for mysql \e[0m"
-sleep 1
-sudo groupadd $MYSQL_USER
-sudo useradd -r -g $MYSQL_USER -s /bin/false $MYSQL_USER
-
+# Check mysql group
+GROUP=`cat /etc/group | grep mysql | awk -F ':' '{print $1}'`
+if [[ $GROUP != $MYSQL_USER ]];then
+  echo -e "\e[1;33;40m Create Group $MYSQL_USER \e[0m"
+  sudo groupadd $MYSQL_USER
+else
+  echo -e "\e[1;33;40m The $MYSQL_USER group already exits. \e[0m"
+fi
+# Check mysql user
+ACCOUNT=`cat /etc/passwd | grep $MYSQL_USER | awk -F ':' '{print $1}'`
+if [[ $ACCOUNT != $MYSQL_USER ]];then
+  echo -e "\e[1;33;40m Create user $MYSQL_USER \e[0m"
+  sudo useradd -r -g $MYSQL_USER -s /bin/false $MYSQL_USER
+else
+  echo -e "\e[1;33;40m The $MYSQL_USER user already exits. \e[0m"
+fi
 ########################### Create a my.cnf in "/etc" ##########################
 echo -e "\e[1;32;40m[2] Create a my.cnf in /etc \e[0m"
 sudo bash -c "echo '# 4Core 8GB
@@ -169,7 +181,7 @@ else
   sudo rm -rf $BASEDIR
 fi
 
-############################# make others dir ##################################
+############################# create others dir ################################
 echo -e "\e[1;32;40m[4] make MySQL dir \e[0m"
 sleep 1
 for dir in $MYSQL_DATA $TMPDIR $LOGDIR $LOGDIR/mysql_binlog
@@ -177,7 +189,7 @@ do
   sudo mkdir -p $dir
 done
 
-############################# make mysql files #################################
+############################# create mysql files ###############################
 echo -e "\e[1;32;40m[5] make MySQL files in /usr/local/mysql \e[0m"
 sleep 1
 for file in $LOGDIR/mysql.err $LOGDIR/general_query.log $LOGDIR/slowquery.log
@@ -190,16 +202,16 @@ sudo wget -P \
   /tmp/ https://github.com/sohwaje/bbs/raw/master/mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz
 
 
-########################## Decom MySQL binary file #############################
+################## extract mysql-5.7.31-linux-glibc2.12-x86_64 #################
 echo -e "\e[1;32;40m[7] Decom MySQL binary file \e[0m"
 sleep 1
 cd /tmp/
 sudo tar xvfz $INSTALLFILE.tar.gz && sudo mv $INSTALLFILE /usr/local/mysql && sudo rm -f $INSTALLFILE.tar.gz
 
-################################# Set permission ###############################
+################################# set permission ###############################
 sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR
 
-############################ initialize mysql func #############################
+############################### initialize mysql ###############################
 initialize_mysql() {
   clear
   echo -e "\e[1;32;40m[8] installing MySQL....... \e[0m"
@@ -216,17 +228,19 @@ initialize_mysql() {
   fi
 }
 
-########################### get a MySQL temporary password #####################
+########################### get MySQL temporary password #######################
 temp_password() {
   echo -e "\e[1;32;40m[10] MySQL temporary password \e[0m"
   echo "temporary password is : $password"
 }
 
-copy_start_script(){
-  # ref: https://qastack.kr/ubuntu/76808/how-do-i-use-variables-in-a-sed-command
+######################### create MySQL start/stop script #######################
+create_start_script(){
   sudo cp -ar $BASEDIR/support-files/mysql.server /etc/rc.d/init.d/mysql.server
+  # about sed : https://qastack.kr/ubuntu/76808/how-do-i-use-variables-in-a-sed-command
   sudo sed -i 's,^basedir=$,'"basedir=$BASEDIR"','  /etc/rc.d/init.d/mysql.server
   sudo sed -i 's,^datadir=$,'"basedir=$MYSQL_DATA"',' /etc/rc.d/init.d/mysql.server
+
   sudo bash -c "cat << EOF > /etc/systemd/system/mysql.service
 [Unit]
 Description=MySQL Server
@@ -248,6 +262,6 @@ start_mysql() {
 }
 
 initialize_mysql
-copy_start_script
+create_start_script
 temp_password
 start_mysql
