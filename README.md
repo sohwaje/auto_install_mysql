@@ -5,6 +5,7 @@
 - 이 스크립트는 가상 머신 생성 초기에 실행시켜야 합니다. sudo 패스워드가 없는 상태로 설치해야 하기 때문입니다.
 - aws 또는 azure 등에서 가상 머신을 생성할 때 사용하는 user-data.sh에 이 스크립트를 복사해서 설치하기를 권장합니다.
 - 보통 docker로 mysql을 많이 쓰지만, 이 스크립트는 이미 커스텀된 설정 파일을 통해 한번에 MySQL5.7을 설치할 수 있습니다.
+- 이 스크립트가 실행되면, 마지막에 MySQL 임시 루트 패스워드가 출력됩니다. 반드시 루트 패스워드를 변경해주세요.
 
 ### [1] 사용 방법
 `
@@ -49,7 +50,7 @@ LOGDIR="$DATADIR/mysql_log"
 MYSQL_USER="mysql"
 `
 
-> MySQL PID 파일 생성 경로: 
+> MySQL PID 파일 생성 경로:
 
 `
 MYSQLD_PID_PATH="$DATADIR/mysql_data"
