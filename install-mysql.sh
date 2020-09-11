@@ -257,7 +257,7 @@ EOF"
 }
 
 start_mysql() {
-  sudo systemctl daemon-reload && sudo systemctl start mysql.server && sudo systemctl enable mysql.server
+  sudo systemctl daemon-reload && sudo systemctl start mysql && sudo systemctl enable mysql
 }
 
 initialize_mysql
