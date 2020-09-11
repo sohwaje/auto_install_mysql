@@ -223,6 +223,7 @@ temp_password() {
 }
 
 copy_start_script(){
+  # ref: https://qastack.kr/ubuntu/76808/how-do-i-use-variables-in-a-sed-command
   sudo cp -ar $BASEDIR/support-files/mysql.server /etc/rc.d/init.d/mysql.server
   sudo sed -i 's,^basedir=$,'"basedir=$BASEDIR"','  /etc/rc.d/init.d/mysql.server
   sudo sed -i 's,^datadir=$,'"basedir=$MYSQL_DATA"',' /etc/rc.d/init.d/mysql.server
@@ -250,5 +251,3 @@ initialize_mysql
 copy_start_script
 temp_password
 start_mysql
-
-# ref: https://qastack.kr/ubuntu/76808/how-do-i-use-variables-in-a-sed-command
