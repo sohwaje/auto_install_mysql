@@ -175,7 +175,7 @@ open-files-limit = 65535
 echo -e "\e[1;32;40m[3] make MySQL dirs if exits /usr/local/mysql \e[0m"
 sleep 1
 if [ ! -d $BASEDIR ];then
-  echo "it's a MySQL home dir."
+  echo -e "\e[1;33;40m It's a $MYSQL_USER home dir.  \e[0m"
 else
   echo "exits $BASEDIR => rm -rf $BASEDIR"
   sudo rm -rf $BASEDIR
