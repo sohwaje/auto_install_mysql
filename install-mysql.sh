@@ -162,8 +162,7 @@ open-files-limit = 65535
 echo -e "\t\e[1;32;40m make mysql dirs if exits /usr/local/mysql \e[0m"
 sleep 1
 if [ ! -d $BASEDIR ];then
-  echo "make $BASEDIR"
-  sudo mkdir -p $BASEDIR
+  echo "directory exits"
 else
   echo "exits $BASEDIR => rm -rf $BASEDIR"
   sudo rm -rf $BASEDIR
@@ -209,7 +208,7 @@ if [ $? -eq 0 ];then
   sleep 1
   password=$(grep 'temporary password' $LOGDIR/mysql.err | awk '{print $11}')
 else
-  echo "Failed"
+  echo "\t\e[1;31;40m Failed \e[0m 1;31m"
   exit 9
 fi
 
