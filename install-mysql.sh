@@ -215,10 +215,18 @@ initialize_mysql() {
     exit 9
   fi
 }
+
+########################### get a MySQL temporary password #####################
+temp_password() {
+  echo -e "\e[1;32;40m[10] MySQL temporary password \e[0m"
+  echo "temporary password is : $password"
+}
+
 ################################### start mysql ################################
 start_mysql() {
   echo -e "\e[1;32;40m[9] Starting MySQL \e[0m"
-  cd $BASEDIR; sudo ./bin/mysqld_safe --defaults-file=/etc/my.cnf --user=mysql >/dev/null &
+  cd $BASEDIR
+  sudo ./bin/mysqld_safe --defaults-file=/etc/my.cnf --user=mysql >/dev/null &
   sleep 100
   # sudo kill -9 $!
   COUNT=100
@@ -237,13 +245,7 @@ start_mysql() {
   fi
   sudo kill -TERM $! 1>/dev/null 2>&1  # 가장 최근 백그라운에서 실행된 프로세스를 종료한다. 표준 출력, 표준 에러 모두 보여주지 않는다.
 }
-########################### get a MySQL temporary password #####################
-
-temp_password() {
-  echo -e "\e[1;32;40m[10] MySQL temporary password \e[0m"
-  echo "temporary password is : $password"
-}
 
 initialize_mysql
-start_mysql
 temp_password
+start_mysql
