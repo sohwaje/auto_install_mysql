@@ -236,10 +236,10 @@ temp_password() {
 
 ######################### create MySQL start/stop script #######################
 create_start_script(){
-  sudo cp -ar $BASEDIR/support-files/mysql.server /etc/rc.d/init.d/mysql.server
+  sudo cp -ar $BASEDIR/support-files/mysql.server /etc/rc.d/init.d/mysql
   # about sed : https://qastack.kr/ubuntu/76808/how-do-i-use-variables-in-a-sed-command
-  sudo sed -i 's,^basedir=$,'"basedir=$BASEDIR"','  /etc/rc.d/init.d/mysql.server
-  sudo sed -i 's,^datadir=$,'"basedir=$MYSQL_DATA"',' /etc/rc.d/init.d/mysql.server
+  sudo sed -i 's,^basedir=$,'"basedir=$BASEDIR"','  /etc/rc.d/init.d/mysql
+  sudo sed -i 's,^datadir=$,'"datadir=$MYSQL_DATA"',' /etc/rc.d/init.d/mysql
 
   sudo bash -c "cat << EOF > /etc/systemd/system/mysql.service
 [Unit]
