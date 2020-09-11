@@ -218,10 +218,10 @@ initialize_mysql() {
 ################################### start mysql ################################
 start_mysql() {
   echo -e "\e[1;32;40m[9] Starting MySQL \e[0m"
-  cd $BASEDIR; sudo ./bin/mysqld_safe --defaults-file=/etc/my.cnf --pid-file="$MYSQLD_PID_PATH" --user=mysql >/dev/null &
-  sudo kill -9 $!
-  sleep 60
-  COUNT=50
+  cd $BASEDIR; sudo ./bin/mysqld_safe --defaults-file=/etc/my.cnf --user=mysql >/dev/null &
+  sleep 100
+  # sudo kill -9 $!
+  COUNT=100
   while [[ $COUNT -gt 0 ]]
   do
     echo > /dev/tcp/127.0.0.1/3306 >/dev/null
@@ -235,6 +235,7 @@ start_mysql() {
     echo -e "\e[1;31;40m [Failed] \e[0m"
     exit 9
   fi
+  sudo kill -9 $! >/dev/null
 }
 ########################### get a MySQL temporary password #####################
 
