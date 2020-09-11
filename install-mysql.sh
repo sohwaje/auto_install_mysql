@@ -248,8 +248,8 @@ After=network.target
 
 [Service]
 Type= forking
-ExecStart = /etc/rc.d/init.d/mysql.server start
-ExecStop = /etc/rc.d/init.d/mysql.server stop
+ExecStart = /etc/rc.d/init.d/mysql start
+ExecStop = /etc/rc.d/init.d/mysql stop
 
 [Install]
 WantedBy=multi-user.target
