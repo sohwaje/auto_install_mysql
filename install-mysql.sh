@@ -213,14 +213,15 @@ done
 ############################# download MySQL 5.7 ###############################
 echo -e "\e[1;32;40m[6] download MySQL5.7 \e[0m"
 sudo wget -P \
-  /tmp/ https://github.com/sohwaje/bbs/raw/master/mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz
+  /tmp/ https://github.com/sohwaje/bbs/raw/master/mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz &
 
 
 ################## extract mysql-5.7.31-linux-glibc2.12-x86_64 #################
-echo -e "\e[1;32;40m[7] Decom MySQL binary file \e[0m"
+echo -e "\e[1;32;40m[7] extracting \e[0m"
 sleep 1
 cd /tmp/
-sudo tar xvfz $INSTALLFILE.tar.gz && sudo mv $INSTALLFILE /usr/local/mysql && sudo rm -f $INSTALLFILE.tar.gz
+sudo tar xvfz $INSTALLFILE.tar.gz && sudo mv $INSTALLFILE /usr/local/mysql && sudo rm -f $INSTALLFILE.tar.gz &
+echo
 
 ################################# set permission ###############################
 sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR
