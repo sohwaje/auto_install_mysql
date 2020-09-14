@@ -9,6 +9,20 @@ LOGDIR="$DATADIR/mysql_log"
 MYSQL_USER="mysql"
 MYSQLD_PID_PATH="$DATADIR/mysql_data"
 
+# OS Check
+################################################################################
+# If you are using CentOS7, the script will run, but if not, stop.
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+  OS=`echo $NAME | awk '{print $1}'`
+  VER=`echo $VERSION | awk '{print $1}'`
+  if [[ $OS == "CentOS" ]] && [[ $VER == "7" ]];then
+    echo " $OS : $VER "
+else
+  echo -e "\e[1;31;40m [Failed] \e[0m"
+  exit 9
+ fi
+fi
 ############################ Create a mysql group & user #######################
 echo -e "\e[1;32;40m[1] create user for mysql \e[0m"
 # Check mysql group
