@@ -17,7 +17,7 @@ if [ -f /etc/os-release ]; then
   OS=`echo $NAME | awk '{print $1}'`
   VER=`echo $VERSION | awk '{print $1}'`
   if [[ $OS == "CentOS" ]] && [[ $VER == "7" ]];then
-    echo " $OS : $VER "
+    echo -e "\e[1;33;40m $OS : $VER \e[0m"
 else
   echo -e "\e[1;31;40m [Failed] \e[0m"
   exit 9
