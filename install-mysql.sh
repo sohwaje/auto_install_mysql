@@ -198,10 +198,10 @@ fi
 echo -e "\e[1;32;40m[3] create mysql $DATADIR \e[0m"
 sleep 1
 if [ ! -d $DATADIR ];then
-  echo -e "\e[1;33;40m [no exits $DATADIR => create $DATADIR] \e[0m"
+  echo -e "\e[1;33;40m [ $DATADIR does not exist => create $DATADIR] \e[0m"
   sudo mkdir $DATADIR
 else
-  echo -e "\e[1;33;40m [exits $DATADIR] \e[0m"
+  echo -e "\e[1;33;40m [ $DATADIR does exist ] \e[0m"
 fi
 ############################# create others dir ################################
 echo -e "\e[1;32;40m[4] make MySQL dir \e[0m"
