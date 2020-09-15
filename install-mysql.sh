@@ -19,7 +19,7 @@ if [ -f /etc/os-release ]; then
   if [[ $OS == "CentOS" ]] && [[ $VER == "7" ]];then
     echo -e "\e[1;33;40m [$OS : $VER] \e[0m"
 else
-  echo -e "\e[1;31;40m [Failed] \e[0m"
+  echo -e "\e[1;31;40m [Failed : OS is not CentOS7.] \e[0m"
   exit 9
  fi
 fi
@@ -255,7 +255,7 @@ initialize_mysql() {
 ########################### get MySQL temporary password #######################
 temp_password() {
   echo -e "\e[1;32;40m[10] MySQL temporary password \e[0m"
-  echo "\e[1;33;40m [temporary password is : $password \e[0m"
+  echo -e "\e[1;33;40m temporary password is : [$password] \e[0m"
 }
 
 ######################### create MySQL start/stop script #######################
