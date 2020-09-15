@@ -9,6 +9,22 @@ LOGDIR="$DATADIR/mysql_log"
 MYSQL_USER="mysql"
 MYSQLD_PID_PATH="$DATADIR/mysql_data"
 
+############################## progress indicator ##############################
+spinner()
+{
+    local pid=$!
+    local delay=0.75
+    local spinstr='|/-\'
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        local temp=${spinstr#?}
+        printf " [%c]  " "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b\b"
+    done
+    printf "    \b\b\b\b"
+}
+
 # OS Check
 ################################################################################
 # If you are using CentOS7, the script will run, but if not, stop.
@@ -238,10 +254,12 @@ sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR
 
 ############################### initialize mysql ###############################
 initialize_mysql() {
-  clear
-  echo -e "\e[1;32;40m[8] Wait a few minutes installing MySQL....... \e[0m"
+  echo -e "\e[1;32;40m[8] Install MySQL5.7 \e[0m"
   cd $BASEDIR || { echo -e "\e[1;31;40m [Failed] \e[0m"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
   sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
+  echo -en "\e[1;32;40m[8] Installing MySQL5.7...... \e[0m"
+  spinner
+  echo -e " installing mysql........ "
   wait # 백그라운드 작업이 끝날 때까지 대기
   if [[ -z `cat $LOGDIR/mysql.err | grep -i "\[Error\]"` ]];then
     echo -e "\e[1;33;40m [Installed] \e[0m"
