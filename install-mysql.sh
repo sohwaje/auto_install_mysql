@@ -257,7 +257,7 @@ initialize_mysql() {
   echo -e "\e[1;32;40m[8] Install MySQL5.7 \e[0m"
   cd $BASEDIR || { echo -e "\e[1;31;40m [Failed] \e[0m"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
   sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
-  echo -en "\e[1;32;40m[8] Installing MySQL5.7...... \e[0m"
+  echo -en "\e[1;32;40m Installing MySQL5.7...... \e[0m"
   spinner
   echo -e " installing mysql........ "
   wait # 백그라운드 작업이 끝날 때까지 대기
