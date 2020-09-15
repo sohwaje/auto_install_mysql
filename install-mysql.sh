@@ -228,7 +228,9 @@ sudo wget -P \
 echo -e "\e[1;32;40m[7] extracting \e[0m"
 sleep 1
 cd /tmp/
-sudo tar xvfz $INSTALLFILE.tar.gz && sudo mv $INSTALLFILE /usr/local/mysql && sudo rm -f $INSTALLFILE.tar.gz
+sudo tar xvfz $INSTALLFILE.tar.gz >& /dev/null \
+  && sudo mv $INSTALLFILE /usr/local/mysql \
+  && sudo rm -f $INSTALLFILE.tar.gz
 
 
 ################################# set permission ###############################
@@ -255,7 +257,7 @@ initialize_mysql() {
 ########################### get MySQL temporary password #######################
 temp_password() {
   echo -e "\e[1;32;40m[10] MySQL temporary password \e[0m"
-  echo -e "\e[1;33;40m temporary password is : [$password] \e[0m"
+  echo -e "\e[1;33;40m temporary password is : $password \e[0m"
 }
 
 ######################### create MySQL start/stop script #######################
