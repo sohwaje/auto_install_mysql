@@ -17,7 +17,7 @@ if [ -f /etc/os-release ]; then
   OS=`echo $NAME | awk '{print $1}'`
   VER=`echo $VERSION | awk '{print $1}'`
   if [[ $OS == "CentOS" ]] && [[ $VER == "7" ]];then
-    echo -e "\e[1;33;40m $OS : $VER \e[0m"
+    echo -e "\e[1;33;40m [$OS : $VER] \e[0m"
 else
   echo -e "\e[1;31;40m [Failed] \e[0m"
   exit 9
@@ -28,18 +28,18 @@ echo -e "\e[1;32;40m[1] create user for mysql \e[0m"
 # Check mysql group
 GROUP=`cat /etc/group | grep mysql | awk -F ':' '{print $1}'`
 if [[ $GROUP != $MYSQL_USER ]];then
-  echo -e "\e[1;33;40m Create Group $MYSQL_USER \e[0m"
+  echo -e "\e[1;33;40m [Create Group $MYSQL_USER] \e[0m"
   sudo groupadd $MYSQL_USER
 else
-  echo -e "\e[1;33;40m The $MYSQL_USER group already exits. \e[0m"
+  echo -e "\e[1;33;40m [$MYSQL_USER group already exits] \e[0m"
 fi
 # Check mysql user
 ACCOUNT=`cat /etc/passwd | grep $MYSQL_USER | awk -F ':' '{print $1}'`
 if [[ $ACCOUNT != $MYSQL_USER ]];then
-  echo -e "\e[1;33;40m Create user $MYSQL_USER \e[0m"
+  echo -e "\e[1;33;40m [Create user $MYSQL_USER] \e[0m"
   sudo useradd -r -g $MYSQL_USER -s /bin/false $MYSQL_USER
 else
-  echo -e "\e[1;33;40m The $MYSQL_USER user already exits. \e[0m"
+  echo -e "\e[1;33;40m [$MYSQL_USER user already exits] \e[0m"
 fi
 ########################### Create a my.cnf in "/etc" ##########################
 echo -e "\e[1;32;40m[2] Create a my.cnf in /etc \e[0m"
@@ -185,22 +185,30 @@ max_allowed_packet = 16M #1024M
 open-files-limit = 65535
 ' > /etc/my.cnf"
 
-################# make mysql dirs if exits /usr/local/mysql ####################
+################# make mysql dirs if no exits /usr/local/mysql #################
 echo -e "\e[1;32;40m[3] make MySQL dirs if exits /usr/local/mysql \e[0m"
 sleep 1
 if [ ! -d $BASEDIR ];then
-  echo -e "\e[1;33;40m It's a $MYSQL_USER home dir.  \e[0m"
+  echo -e "\e[1;33;40m [It's a $MYSQL_USER home dir]  \e[0m"
 else
-  echo "exits $BASEDIR => rm -rf $BASEDIR"
+  echo "[exits $BASEDIR => rm -rf $BASEDIR]"
   sudo rm -rf $BASEDIR
 fi
-
+################ create mysql DATADIR if no exits /data ########################
+echo -e "\e[1;32;40m[3] create mysql $DATADIR \e[0m"
+sleep 1
+if [ ! -d $DATADIR ];then
+  echo -e "\e[1;33;40m [no exits $DATADIR => create $DATADIR] \e[0m"
+  sudo mkdir $DATADIR
+else
+  echo -e "\e[1;33;40m [exits $DATADIR] \e[0m"
+fi
 ############################# create others dir ################################
 echo -e "\e[1;32;40m[4] make MySQL dir \e[0m"
 sleep 1
 for dir in $MYSQL_DATA $TMPDIR $LOGDIR $LOGDIR/mysql_binlog
 do
-  sudo mkdir -p $dir
+  sudo mkdir $dir
 done
 
 ############################# create mysql files ###############################
@@ -247,7 +255,7 @@ initialize_mysql() {
 ########################### get MySQL temporary password #######################
 temp_password() {
   echo -e "\e[1;32;40m[10] MySQL temporary password \e[0m"
-  echo "temporary password is : $password"
+  echo "\e[1;33;40m [temporary password is : $password \e[0m"
 }
 
 ######################### create MySQL start/stop script #######################
