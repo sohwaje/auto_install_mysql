@@ -13,20 +13,34 @@ LOGDIR="$DATADIR/mysql_log"
 MYSQL_USER="mysql"
 MYSQLD_PID_PATH="$DATADIR/mysql_data"
 ############################## progress indicator ##############################
-spinner()
-{
-    local pid=$!  # 백그라운드로 실행시킨 프로세스
-    local delay=0.2
-    local spinstr='|/-\'
-    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-        local temp=${spinstr#?}
-        printf " [%c]  " "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        printf "\b\b\b\b\b\b"
+# spinner()
+# {
+#     local pid=$!  # 백그라운드로 실행시킨 프로세스
+#     local delay=0.2
+#     local spinstr='|/-\'
+#     while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+#         local temp=${spinstr#?}
+#         printf " [%c]  " "$spinstr"
+#         local spinstr=$temp${spinstr%"$temp"}
+#         sleep $delay
+#         printf "\b\b\b\b\b\b"
+#     done
+#     printf "    \b\b\b\b"
+# }
+
+# spinner=( Ooooo oOooo ooOoo oooOo ooooO oooOo ooOoo oOooo);
+spinner=( '|' '/' '-' '\' )
+spin(){
+  while [ 1 ]
+  do
+    for i in "${spinner[@]}"
+    do
+      echo -ne "\r[$i]";
+      sleep 0.2;
     done
-    printf "    \b\b\b\b"
+  done
 }
+
 # OS Check
 ################################################################################
 # If you are using CentOS7, the script will run, but if not, stop.
@@ -242,7 +256,7 @@ done
 ############################# download MySQL 5.7 ###############################
 echo -e "\e[1;32;40m[7] Downloading MySQL5.7 \e[0m"
 sudo wget -P \
-  /tmp/ https://github.com/sohwaje/bbs/raw/master/${INSTALLFILE}.tar.gz >& /dev/null
+  /tmp/ https://github.com/sohwaje/auto_install_mysql/blob/master/$INSTALLFILE.tar.gz >& /dev/null
 ################## extract mysql-5.7.31-linux-glibc2.12-x86_64 #################
 echo -e "\e[1;32;40m[8] Extracting mysql-5.7 \e[0m"
 sleep 1
@@ -257,8 +271,8 @@ initialize_mysql() {
   echo -e "\e[1;32;40m[9] Install MySQL5.7 \e[0m"
   cd $BASEDIR || { echo -e "\e[1;31;40m [Failed] \e[0m"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
   sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
-  echo -n "Installing......"
-  spinner  # progress indicator
+  echo -n "\t Installing......"
+  spin  # progress indicator
   echo ""
   wait # 백그라운드 작업이 끝날 때까지 대기
   if [[ -z `cat $LOGDIR/mysql.err | grep -i "\[Error\]"` ]];then
