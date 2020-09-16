@@ -256,7 +256,7 @@ done
 ############################# download MySQL 5.7 ###############################
 echo -e "\e[1;32;40m[7] Downloading MySQL5.7 \e[0m"
 sudo wget -P \
-  /tmp/ https://github.com/sohwaje/auto_install_mysql/blob/master/$INSTALLFILE.tar.gz >& /dev/null
+  /tmp/ http://ftp.kaist.ac.kr/mysql/Downloads/MySQL-5.7/$INSTALLFILE.tar.gz >& /dev/null
 ################## extract mysql-5.7.31-linux-glibc2.12-x86_64 #################
 echo -e "\e[1;32;40m[8] Extracting mysql-5.7 \e[0m"
 sleep 1
