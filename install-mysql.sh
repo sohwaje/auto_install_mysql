@@ -1,4 +1,8 @@
 #!/bin/sh
+### Name    : install-mysql.sh
+### Author  : sohwaje
+### Version : 1.0
+### Date    : 2020-09-16
 ############################## Set variables ###################################
 INSTALLFILE="mysql-5.7.31-linux-glibc2.12-x86_64"
 BASEDIR="/usr/local/mysql"
@@ -38,7 +42,7 @@ else
  fi
 fi
 ################# MySQL has a dependency on the libaio library #################
-rpm -qa | grep libaio
+rpm -qa | grep libaio > /dev/null
 if [[ $? -eq 0 ]];then
   echo -e "\e[1;33;40m [libaio already installed] \e[0m"
 else
@@ -227,10 +231,7 @@ fi
 ############################# create others dir ################################
 echo -e "\e[1;32;40m[5] Create MySQL directory \e[0m"
 sleep 1
-for dir in $MYSQL_DATA $TMPDIR $LOGDIR $LOGDIR/mysql_binlog
-do
-  sudo mkdir $dir
-done
+sudo mkdir -p {"$MYSQL_DATA","$TMPDIR","$LOGDIR","$LOGDIR/mysql_binlog"}
 ############################# create mysql files ###############################
 echo -e "\e[1;32;40m[6] Make MySQL files in /usr/local/mysql directory \e[0m"
 sleep 1
