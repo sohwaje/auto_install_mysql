@@ -8,26 +8,21 @@ TMPDIR="$DATADIR/mysql_tmp"
 LOGDIR="$DATADIR/mysql_log"
 MYSQL_USER="mysql"
 MYSQLD_PID_PATH="$DATADIR/mysql_data"
-
 ############################## progress indicator ##############################
-# example:
-# scripts &
-# echo "copying file"
-# spin
-spinner=( '|' '/' '-' '\' )
-spin()
+spinner()
 {
-  local pid=$!
-  local delay=0.2
-  while [ 1 ]; do
-    for i in ${spinner[@]};
-    do
-      echo -en "\r$i";
-      sleep $delay
-    done;
-  done
+    local pid=$!  # 백그라운드로 실행시킨 프로세스
+    local delay=0.2
+    local spinstr='|/-\'
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        local temp=${spinstr#?}
+        printf " [%c]  " "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b\b"
+    done
+    printf "    \b\b\b\b"
 }
-
 # OS Check
 ################################################################################
 # If you are using CentOS7, the script will run, but if not, stop.
@@ -36,18 +31,26 @@ if [ -f /etc/os-release ]; then
   OS=`echo $NAME | awk '{print $1}'`
   VER=`echo $VERSION | awk '{print $1}'`
   if [[ $OS == "CentOS" ]] && [[ $VER == "7" ]];then
-    echo -e "\e[1;33;40m [$OS : $VER] \e[0m"
+    echo -e "\e[1;33;40m [This Machine OS is $OS$VER] \e[0m"
 else
-  echo -e "\e[1;31;40m [Failed : OS is not CentOS7.] \e[0m"
+  echo -e "\e[1;31;40m [Failed : This Machine OS is not CentOS7.] \e[0m"
   exit 9
  fi
 fi
-############################ Create a mysql group & user #######################
-echo -e "\e[1;32;40m[1] create user for mysql \e[0m"
+################# MySQL has a dependency on the libaio library #################
+rpm -qa | grep libaio
+if [[ $? -eq 0 ]];then
+  echo -e "\e[1;33;40m [libaio already installed] \e[0m"
+else
+  echo -e "\e[0;33;47m libaio was not found. Install libaio \e[0m"
+  sudo yum install -y libaio >& /dev/null
+  exit 9
+fi
+########################### Create a mysql User and Group ######################
+echo -e "\e[1;32;40m[1] Create a mysql User and Group \e[0m"
 # Check mysql group
 GROUP=`cat /etc/group | grep mysql | awk -F ':' '{print $1}'`
 if [[ $GROUP != $MYSQL_USER ]];then
-  echo -e "\e[1;33;40m [Create Group $MYSQL_USER] \e[0m"
   sudo groupadd $MYSQL_USER
 else
   echo -e "\e[1;33;40m [$MYSQL_USER group already exits] \e[0m"
@@ -55,13 +58,12 @@ fi
 # Check mysql user
 ACCOUNT=`cat /etc/passwd | grep $MYSQL_USER | awk -F ':' '{print $1}'`
 if [[ $ACCOUNT != $MYSQL_USER ]];then
-  echo -e "\e[1;33;40m [Create user $MYSQL_USER] \e[0m"
   sudo useradd -r -g $MYSQL_USER -s /bin/false $MYSQL_USER
 else
   echo -e "\e[1;33;40m [$MYSQL_USER user already exits] \e[0m"
 fi
-########################### Create a my.cnf in "/etc" ##########################
-echo -e "\e[1;32;40m[2] Create a my.cnf in /etc \e[0m"
+########################### Create a my.cnf into "/etc" ########################
+echo -e "\e[1;32;40m[2] Create a my.cnf \e[0m"
 sudo bash -c "echo '# 4Core 8GB
 [client]
 port            = 3306
@@ -205,63 +207,58 @@ open-files-limit = 65535
 ' > /etc/my.cnf"
 
 ################# make mysql dirs if no exits /usr/local/mysql #################
-echo -e "\e[1;32;40m[3] make MySQL dirs if exits /usr/local/mysql \e[0m"
+echo -e "\e[1;32;40m[3] Create MySQL Base directory \e[0m"
 sleep 1
 if [ ! -d $BASEDIR ];then
-  echo -e "\e[1;33;40m [It's a $MYSQL_USER home dir]  \e[0m"
+  echo -e "\e[1;33;40m [$BASEDIR directory dose not exist]  \e[0m"
 else
-  echo "[exits $BASEDIR => rm -rf $BASEDIR]"
+  echo "[$BASEDIR directory already exits, recreate New $BASEDIR directory]"
   sudo rm -rf $BASEDIR
 fi
 ################ create mysql DATADIR if no exits /data ########################
-echo -e "\e[1;32;40m[3] create mysql $DATADIR \e[0m"
+echo -e "\e[1;32;40m[4] Create a new mysql $DATADIR \e[0m"
 sleep 1
 if [ ! -d $DATADIR ];then
-  echo -e "\e[1;33;40m [ $DATADIR does not exist => create $DATADIR] \e[0m"
+  echo -e "\e[1;33;40m [$DATADIR directory does not exist, recreate $DATADIR directory] \e[0m"
   sudo mkdir $DATADIR
 else
-  echo -e "\e[1;33;40m [ $DATADIR does exist ] \e[0m"
+  echo -e "\e[1;33;40m [$DATADIR directory does exist] \e[0m"
 fi
 ############################# create others dir ################################
-echo -e "\e[1;32;40m[4] make MySQL dir \e[0m"
+echo -e "\e[1;32;40m[5] Create MySQL directory \e[0m"
 sleep 1
 for dir in $MYSQL_DATA $TMPDIR $LOGDIR $LOGDIR/mysql_binlog
 do
   sudo mkdir $dir
 done
-
 ############################# create mysql files ###############################
-echo -e "\e[1;32;40m[5] make MySQL files in /usr/local/mysql \e[0m"
+echo -e "\e[1;32;40m[6] Make MySQL files in /usr/local/mysql directory \e[0m"
 sleep 1
 for file in $LOGDIR/mysql.err $LOGDIR/general_query.log $LOGDIR/slowquery.log
 do
   sudo touch $file
 done
 ############################# download MySQL 5.7 ###############################
-echo -e "\e[1;32;40m[6] download MySQL5.7 \e[0m"
+echo -e "\e[1;32;40m[7] Downloading MySQL5.7 \e[0m"
 sudo wget -P \
   /tmp/ https://github.com/sohwaje/bbs/raw/master/${INSTALLFILE}.tar.gz >& /dev/null
-
-
 ################## extract mysql-5.7.31-linux-glibc2.12-x86_64 #################
-echo -e "\e[1;32;40m[7] extracting \e[0m"
+echo -e "\e[1;32;40m[8] Extracting mysql-5.7 \e[0m"
 sleep 1
 cd /tmp/
-sudo tar xvfz $INSTALLFILE.tar.gz >& /dev/null \
-  && sudo mv $INSTALLFILE /usr/local/mysql \
-  && sudo rm -f $INSTALLFILE.tar.gz
-
-
+sudo tar xvfz $INSTALLFILE.tar.gz >& /dev/null
+sudo mv $INSTALLFILE /usr/local/mysql && sudo rm -f $INSTALLFILE.tar.gz
 ################################# set permission ###############################
 sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR
 
 ############################### initialize mysql ###############################
 initialize_mysql() {
-  echo -e "\e[1;32;40m[8] Install MySQL5.7 \e[0m"
+  echo -e "\e[1;32;40m[9] Install MySQL5.7 \e[0m"
   cd $BASEDIR || { echo -e "\e[1;31;40m [Failed] \e[0m"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
   sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
-  spin
-  echo -en "\t\e[1;32;40m Installing MySQL5.7...... \e[0m"
+  echo -n "Installing......"
+  spinner
+  echo ""
   wait # 백그라운드 작업이 끝날 때까지 대기
   if [[ -z `cat $LOGDIR/mysql.err | grep -i "\[Error\]"` ]];then
     echo -e "\e[1;33;40m [Installed] \e[0m"
