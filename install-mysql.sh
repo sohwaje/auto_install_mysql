@@ -31,6 +31,7 @@ MYSQLD_PID_PATH="$DATADIR/mysql_data"
 # spinner=( Ooooo oOooo ooOoo oooOo ooooO oooOo ooOoo oOooo);
 spinner=( '|' '/' '-' '\' )
 spin(){
+  local pid=$! 
   while [ 1 ]
   do
     for i in "${spinner[@]}"
