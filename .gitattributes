@@ -1,1 +1,2 @@
 mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz filter=lfs diff=lfs merge=lfs -text
+*.psd filter=lfs diff=lfs merge=lfs -text

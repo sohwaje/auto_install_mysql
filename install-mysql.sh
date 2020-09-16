@@ -1,8 +1,8 @@
 #!/bin/sh
 ### Name    : install-mysql.sh
 ### Author  : sohwaje
-### Version : 1.0
-### Date    : 2020-09-16
+### Version : 2.0
+### Date    : 2020-09-17
 ############################## Set variables ###################################
 INSTALLFILE="mysql-5.7.31-linux-glibc2.12-x86_64"
 BASEDIR="/usr/local/mysql"
