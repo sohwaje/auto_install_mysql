@@ -10,19 +10,22 @@ MYSQL_USER="mysql"
 MYSQLD_PID_PATH="$DATADIR/mysql_data"
 
 ############################## progress indicator ##############################
-spinner()
+# example:
+# scripts &
+# echo "copying file"
+# spin
+spinner=( '|' '/' '-' '\' )
+spin()
 {
-    local pid=$!
-    local delay=0.75
-    local spinstr='|/-\'
-    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-        local temp=${spinstr#?}
-        printf " [%c]  " "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        printf "\b\b\b\b\b\b"
-    done
-    printf "    \b\b\b\b"
+  local pid=$!
+  local delay=0.2
+  while [ 1 ]; do
+    for i in ${spinner[@]};
+    do
+      echo -en "\r$i";
+      sleep $delay
+    done;
+  done
 }
 
 # OS Check
@@ -257,9 +260,8 @@ initialize_mysql() {
   echo -e "\e[1;32;40m[8] Install MySQL5.7 \e[0m"
   cd $BASEDIR || { echo -e "\e[1;31;40m [Failed] \e[0m"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
   sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
-  echo -en "\e[1;32;40m Installing MySQL5.7...... \e[0m"
-  spinner
-  echo -e " installing mysql........ "
+  spin
+  echo -en "\t\e[1;32;40m Installing MySQL5.7...... \e[0m"
   wait # 백그라운드 작업이 끝날 때까지 대기
   if [[ -z `cat $LOGDIR/mysql.err | grep -i "\[Error\]"` ]];then
     echo -e "\e[1;33;40m [Installed] \e[0m"
