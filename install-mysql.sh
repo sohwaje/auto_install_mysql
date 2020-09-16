@@ -257,7 +257,7 @@ initialize_mysql() {
   cd $BASEDIR || { echo -e "\e[1;31;40m [Failed] \e[0m"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
   sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
   echo -n "Installing......"
-  spinner
+  spinner  # progress indicator
   echo ""
   wait # 백그라운드 작업이 끝날 때까지 대기
   if [[ -z `cat $LOGDIR/mysql.err | grep -i "\[Error\]"` ]];then
