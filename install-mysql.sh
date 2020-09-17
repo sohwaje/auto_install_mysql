@@ -280,9 +280,9 @@ initialize_mysql() {
   spin  # progress indicator
   echo ""
   wait # 백그라운드 작업이 끝날 때까지 대기
+  password=$(grep 'temporary password' $LOGDIR/mysql.err | awk '{print $11}')
   if [[ -z `cat $LOGDIR/mysql.err | grep -i "\[Error\]"` ]];then
     echo -e "\e[1;33;40m [Installed] \e[0m"
-    password=$(grep 'temporary password' $LOGDIR/mysql.err | awk '{print $11}')
     sleep 3
   else
     echo -e "\e[1;31;40m [Failed] \e[0m"
