@@ -260,7 +260,7 @@ done
 echo -e "\e[1;32;40m[7] Downloading MySQL5.7 \e[0m"
 sudo wget -P \
   /tmp/ http://ftp.kaist.ac.kr/mysql/Downloads/MySQL-5.7/$INSTALLFILE.tar.gz -q & >& /dev/null
-  echo -en "\t\e[1;36;40m   Downloading.....\e[0m"
+  echo -en "\e[1;36;40m   Downloading.....\e[0m"
   spin
   echo ""
 ################## extract mysql-5.7.31-linux-glibc2.12-x86_64 #################
@@ -276,7 +276,7 @@ initialize_mysql() {
   echo -e "\e[1;32;40m[9] Install MySQL5.7 \e[0m"
   cd $BASEDIR || { echo -e "\e[1;31;40m [Failed] \e[0m"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
   sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
-  echo -n "\t\t     Installing......"
+  echo -en "\t\t\e[1;36;40m     Installing......\e[0m"
   spin  # progress indicator
   echo ""
   wait # 백그라운드 작업이 끝날 때까지 대기
