@@ -12,22 +12,22 @@ TMPDIR="$DATADIR/mysql_tmp"
 LOGDIR="$DATADIR/mysql_log"
 MYSQL_USER="mysql"
 MYSQLD_PID_PATH="$DATADIR/mysql_data"
+############################## compress indicator ##############################
+# usage: tar xvfz *.tar.gz | _extract
+_extract(){
+  while read line; do
+    x=$((x+1))
+    echo -en "\e[1;36;40m [$x] extracted\r \e[0m"
+  done
+  echo -e "\e[1;33;40m Successfully extracted \e[0m"
+}
 ############################## progress indicator ##############################
-# spinner()
-# {
-#     local pid=$!  # 백그라운드로 실행시킨 프로세스
-#     local delay=0.2
-#     local spinstr='|/-\'
-#     while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-#         local temp=${spinstr#?}
-#         printf " [%c]  " "$spinstr"
-#         local spinstr=$temp${spinstr%"$temp"}
-#         sleep $delay
-#         printf "\b\b\b\b\b\b"
-#     done
-#     printf "    \b\b\b\b"
-# }
-
+# usage:
+:<<'END'
+echo -n "\t\t     Installing......"
+spin
+echo ""
+END
 spinner=( Ooooo oOooo ooOoo oooOo ooooO oooOo ooOoo oOooo);
 # spinner=( '|' '/' '-' '\' )
 spin(){
@@ -51,16 +51,17 @@ if [ -f /etc/os-release ]; then
   OS=`echo $NAME | awk '{print $1}'`
   VER=`echo $VERSION | awk '{print $1}'`
   if [[ $OS == "CentOS" ]] && [[ $VER == "7" ]];then
-    echo -e "\e[1;33;40m [This Machine OS is $OS$VER] \e[0m"
-else
-  echo -e "\e[1;31;40m [Failed : This Machine OS is not CentOS7.] \e[0m"
-  exit 9
- fi
+    echo -e "\e[0;30;47m [This Machine OS is $OS $VER] \e[0m"
+  else
+    echo -e "\e[0;31;47m [Failed : This Machine OS is not $OS $VER.] \e[0m"
+    exit 9
+  fi
 fi
 ################# MySQL has a dependency on the libaio library #################
 rpm -qa | grep libaio > /dev/null
 if [[ $? -eq 0 ]];then
-  echo -e "\e[1;33;40m [libaio already installed] \e[0m"
+  echo -e "\e[1;40m [libaio already installed] \e[0m"
+  echo ""
 else
   echo -e "\e[0;33;47m libaio was not found. Install libaio \e[0m"
   sudo yum install -y libaio >& /dev/null
@@ -230,7 +231,7 @@ open-files-limit = 65535
 echo -e "\e[1;32;40m[3] Create MySQL Base directory \e[0m"
 sleep 1
 if [ ! -d $BASEDIR ];then
-  echo -e "\e[1;33;40m [$BASEDIR directory dose not exist, Create New $BASEDIR directory]  \e[0m"
+  echo -e "\e[1;40m [$BASEDIR directory dose not exist, Create New $BASEDIR directory] \e[0m"
 else
   echo "[$BASEDIR directory already exits, recreate New $BASEDIR directory]"
   sudo rm -rf $BASEDIR
@@ -239,7 +240,7 @@ fi
 echo -e "\e[1;32;40m[4] Create a new mysql $DATADIR \e[0m"
 sleep 1
 if [ ! -d $DATADIR ];then
-  echo -e "\e[1;33;40m [$DATADIR directory does not exist, recreate $DATADIR directory] \e[0m"
+  echo -e "\e[1;40m [$DATADIR directory does not exist, recreate $DATADIR directory] \e[0m"
   sudo mkdir $DATADIR
 else
   echo -e "\e[1;33;40m [$DATADIR directory does exist] \e[0m"
@@ -258,12 +259,14 @@ done
 ############################# download MySQL 5.7 ###############################
 echo -e "\e[1;32;40m[7] Downloading MySQL5.7 \e[0m"
 sudo wget -P \
-  /tmp/ http://ftp.kaist.ac.kr/mysql/Downloads/MySQL-5.7/$INSTALLFILE.tar.gz >& /dev/null
+  /tmp/ http://ftp.kaist.ac.kr/mysql/Downloads/MySQL-5.7/$INSTALLFILE.tar.gz -q & >& /dev/null
+  echo -en "\t\e[1;36;40m   Downloading.....\e[0m"
+  spin
+  echo ""
 ################## extract mysql-5.7.31-linux-glibc2.12-x86_64 #################
 echo -e "\e[1;32;40m[8] Extracting mysql-5.7 \e[0m"
-sleep 1
 cd /tmp/
-sudo tar xvfz $INSTALLFILE.tar.gz >& /dev/null
+sudo tar xvfz $INSTALLFILE.tar.gz 2>&1 | _extract
 sudo mv $INSTALLFILE /usr/local/mysql && sudo rm -f $INSTALLFILE.tar.gz
 ################################# set permission ###############################
 sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR
