@@ -4,7 +4,7 @@
 ### Version : 2.0
 ### Date    : 2020-09-17
 ############################## Set variables ###################################
-INSTALLFILE="mysql-5.7.31-linux-glibc2.12-x86_64"
+INSTALLFILE="mysql-5.7.30-linux-glibc2.12-x86_64"
 BASEDIR="/usr/local/mysql"
 DATADIR="/data"
 MYSQL_DATA="$DATADIR/mysql_data"
@@ -12,6 +12,28 @@ TMPDIR="$DATADIR/mysql_tmp"
 LOGDIR="$DATADIR/mysql_log"
 MYSQL_USER="mysql"
 MYSQLD_PID_PATH="$DATADIR/mysql_data"
+######################### MySQL Download site Check ############################
+declare -a url_list # url_list를 배열로 지정한다.
+url_list=( "http://ftp.kaist.ac.kr/mysql/Downloads/MySQL-5.7/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz"
+"https://downloads.mysql.com/archives/get/p/23/file/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz"
+"http://ftp.jaist.ac.jp/pub/mysql/Downloads/MySQL-5.7/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz" )
+
+# url()
+# {
+#     if [ ! -z "$1" ]; then
+#         curl -Is "$1" | grep -w "200\|301" >/dev/null 2>&1
+#         [ "$?" -eq 0 ] && echo "Url : $1 exists..." || echo "Url : $1 doesn't exists.."
+#     else
+#         echo "No Arguments..exiting"
+#     fi
+# }
+url()
+{
+    if [ ! -z "$1" ]; then
+        curl -Is "$1" | grep -w "200\|301" >/dev/null 2>&1
+        [ "$?" -eq 0 ] && echo "0" || echo "1"
+    fi
+}
 ############################## compress indicator ##############################
 # usage: tar xvfz *.tar.gz | _extract
 _extract(){
@@ -257,7 +279,30 @@ do
   sudo touch $file
 done
 ############################# download MySQL 5.7 ###############################
-echo -e "\e[1;32;40m[7] Downloading MySQL5.7 \e[0m"
+#
+# if [ $(url "${url_list[0]}") == "0" ]; then
+#   sudo wget -P /tmp/ "${url_list[0]}" -q & >& /dev/null
+#   echo -en "\t\e[1;36;40m    Downloading.....\e[0m"
+#   echo "${url_list[0]}"
+#   spin
+#   echo ""
+# elif [ $(url "${url_list[1]}") == "0" ]; then
+#   sudo wget -P /tmp/ "${url_list[1]}" -q & >& /dev/null
+#   echo -en "\t\e[1;36;40m    Downloading.....\e[0m"
+#   echo "${url_list[1]}"
+#   spin
+#   echo ""
+# elif [ $(url "${url_list[2]}") == "0" ]; then
+#   sudo wget -P /tmp/ "${url_list[2]}" -q & >& /dev/null
+#   echo -en "\t\e[1;36;40m    Downloading.....\e[0m"
+#   echo "${url_list[2]}"
+#   spin
+#   echo ""
+# else
+#   echo  "failed"
+#   exit 9
+# fi
+
 sudo wget -P \
   /tmp/ http://ftp.kaist.ac.kr/mysql/Downloads/MySQL-5.7/$INSTALLFILE.tar.gz -q & >& /dev/null
   echo -en "\t\e[1;36;40m   Downloading.....\e[0m"
