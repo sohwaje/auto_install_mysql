@@ -13,24 +13,15 @@ LOGDIR="$DATADIR/mysql_log"
 MYSQL_USER="mysql"
 MYSQLD_PID_PATH="$DATADIR/mysql_data"
 ######################### MySQL Download site Check ############################
-declare -a url_list # url_list를 배열로 지정한다.
-url_list=( "http://ftp.kaist.ac.kr/mysql/Downloads/MySQL-5.7/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz"
-"https://downloads.mysql.com/archives/get/p/23/file/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz"
+declare -a _list # _list를 배열로 취급
+_list=( "https://downloads.mysql.com/archives/get/p/23/file/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz"
+"http://ftp.kaist.ac.kr/mysql/Downloads/MySQL-5.7/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz"
 "http://ftp.jaist.ac.jp/pub/mysql/Downloads/MySQL-5.7/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz" )
 
-# url()
-# {
-#     if [ ! -z "$1" ]; then
-#         curl -Is "$1" | grep -w "200\|301" >/dev/null 2>&1
-#         [ "$?" -eq 0 ] && echo "Url : $1 exists..." || echo "Url : $1 doesn't exists.."
-#     else
-#         echo "No Arguments..exiting"
-#     fi
-# }
 url()
 {
     if [ ! -z "$1" ]; then
-        curl -Is "$1" | grep -w "200\|301" >/dev/null 2>&1
+        curl -Is "$1" | grep -w "200\|301\|302" >/dev/null 2>&1
         [ "$?" -eq 0 ] && echo "0" || echo "1"
     fi
 }
@@ -261,56 +252,48 @@ fi
 ################ create mysql DATADIR if no exits /data ########################
 echo -e "\e[1;32;40m[4] Create a new mysql $DATADIR \e[0m"
 sleep 1
-if [ ! -d $DATADIR ];then
-  echo -e "\e[1;40m [$DATADIR directory does not exist, recreate $DATADIR directory] \e[0m"
-  sudo mkdir $DATADIR
+if [ ! -d $MYSQL_DATA ];then
+  echo -e "\e[1;40m [MySQL directory does not exist, create MySQL directory] \e[0m"
+  # sudo mkdir $DATADIR
+  sudo mkdir -p {"$DATADIR","$MYSQL_DATA","$TMPDIR","$LOGDIR","$LOGDIR/mysql_binlog"}
 else
-  echo -e "\e[1;33;40m [$DATADIR directory does exist] \e[0m"
+  echo -e "\e[1;33;40m [MySQL directory does exist] \e[0m"
 fi
-############################# create others dir ################################
-echo -e "\e[1;32;40m[5] Create MySQL directory \e[0m"
-sleep 1
-sudo mkdir -p {"$MYSQL_DATA","$TMPDIR","$LOGDIR","$LOGDIR/mysql_binlog"}
 ############################# create mysql files ###############################
 echo -e "\e[1;32;40m[6] Make MySQL files in /usr/local/mysql directory \e[0m"
 sleep 1
-for file in $LOGDIR/mysql.err $LOGDIR/general_query.log $LOGDIR/slowquery.log
-do
-  sudo touch $file
-done
+if [ ! -f $LOGDIR/mysql.err ];then
+  sudo touch {"$LOGDIR/mysql.err","$LOGDIR/general_query.log","$LOGDIR/slowquery.log"}
+else
+  echo ""
+fi
 ############################# download MySQL 5.7 ###############################
-#
-# if [ $(url "${url_list[0]}") == "0" ]; then
-#   sudo wget -P /tmp/ "${url_list[0]}" -q & >& /dev/null
-#   echo -en "\t\e[1;36;40m    Downloading.....\e[0m"
-#   echo "${url_list[0]}"
-#   spin
-#   echo ""
-# elif [ $(url "${url_list[1]}") == "0" ]; then
-#   sudo wget -P /tmp/ "${url_list[1]}" -q & >& /dev/null
-#   echo -en "\t\e[1;36;40m    Downloading.....\e[0m"
-#   echo "${url_list[1]}"
-#   spin
-#   echo ""
-# elif [ $(url "${url_list[2]}") == "0" ]; then
-#   sudo wget -P /tmp/ "${url_list[2]}" -q & >& /dev/null
-#   echo -en "\t\e[1;36;40m    Downloading.....\e[0m"
-#   echo "${url_list[2]}"
-#   spin
-#   echo ""
-# else
-#   echo  "failed"
-#   exit 9
-# fi
 
-sudo wget -P \
-  /tmp/ http://ftp.kaist.ac.kr/mysql/Downloads/MySQL-5.7/$INSTALLFILE.tar.gz -q & >& /dev/null
-  echo -en "\t\e[1;36;40m   Downloading.....\e[0m"
+if [ $(url "${_list[0]}") == "0" ]; then                 # try
+  sudo wget -P /tmp/ "${_list[0]}" -q & >& /dev/null
+  echo "${_list[0]}"
+  echo -en "\t\e[1;36;40m    Downloading.....\e[0m"
   spin
   echo ""
+elif [ $(url "${_list[1]}") == "0" ]; then               # retry
+  sudo wget -P /tmp/ "${_list[1]}" -q & >& /dev/null
+  echo "${_list[1]}"
+  echo -en "\t\e[1;36;40m    Downloading.....\e[0m"
+  spin
+  echo ""
+elif [ $(url "${_list[2]}") == "0" ]; then               #final try
+  sudo wget -P /tmp/ "${_list[2]}" -q & >& /dev/null
+  echo "${_list[2]}"
+  echo -en "\t\e[1;36;40m    Downloading.....\e[0m"
+  spin
+  echo ""
+else
+  echo -e "\e[1;31;40m [Download Failed] \e[0m"
+  exit 9
+fi
 ################## extract mysql-5.7.31-linux-glibc2.12-x86_64 #################
 echo -e "\e[1;32;40m[8] Extracting mysql-5.7 \e[0m"
-cd /tmp/
+cd /tmp/ || { echo -e "\e[1;31;40m [cd failed] \e[0m"; exit 1; }
 sudo tar xvfz $INSTALLFILE.tar.gz 2>&1 | _extract
 sudo mv $INSTALLFILE /usr/local/mysql && sudo rm -f $INSTALLFILE.tar.gz
 ################################# set permission ###############################
@@ -328,21 +311,17 @@ initialize_mysql() {
   password=$(grep 'temporary password' $LOGDIR/mysql.err | awk '{print $11}')
   if [[ -z `cat $LOGDIR/mysql.err | grep -i "\[Error\]"` ]];then
     echo -e "\e[1;33;40m [Installed] \e[0m"
-    sleep 3
   else
     echo -e "\e[1;31;40m [Failed] \e[0m"
-    sleep 1
     exit 9
   fi
 }
-
-########################### get MySQL temporary password #######################
+########################### Get MySQL temporary password #######################
 temp_password() {
   echo -e "\e[1;32;40m[10] MySQL temporary password \e[0m"
   echo -e "\e[1;33;40m temporary password is : $password \e[0m"
 }
-
-######################### create MySQL start/stop script #######################
+######################### Create MySQL start/stop script #######################
 create_start_script(){
   sudo cp -ar $BASEDIR/support-files/mysql.server /etc/rc.d/init.d/mysql
   # about sed : https://qastack.kr/ubuntu/76808/how-do-i-use-variables-in-a-sed-command
@@ -368,7 +347,17 @@ start_mysql() {
   sudo systemctl daemon-reload && sudo systemctl start mysql && sudo systemctl enable mysql
 }
 
+help_usage(){
+  echo ""
+  echo "#############################################################################################"
+  echo "# This password is a temporary password. Please make sure to change your password as below. #"
+  echo "# - sudo $BASEDIR/bin/mysql -uroot -p'$password'                                             #"
+  echo "# - mysql> alter user 'root'@'localhost' identified by 'PASSWORD'                           #"
+  echo "#############################################################################################"
+}
+
 initialize_mysql
 create_start_script
 temp_password
 start_mysql
+help_usage
