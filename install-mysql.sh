@@ -340,7 +340,7 @@ help_usage(){
   echo ""
   echo "#############################################################################################"
   echo "# This password is a temporary password. Please make sure to change your password as below. #"
-  echo "# - sudo $BASEDIR/bin/mysql -uroot -p'$password'                                             #"
+  echo "# - sudo $BASEDIR/bin/mysql -uroot -p'$password'                                     #"
   echo "# - mysql> alter user 'root'@'localhost' identified by 'PaSSWORD'                           #"
   echo "#############################################################################################"
 }
