@@ -77,7 +77,7 @@ MYSQLD_PID_PATH="$DATADIR/mysql_data"
 `
 ./install-mysql.sh
 `
-### [2] Set variables
+### [2] Description variables
 > Set basic variable settings, MySQL data directory, MySQL engine directory, and MySQL log directory.
 
 > installation file :
