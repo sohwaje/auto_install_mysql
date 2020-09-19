@@ -35,14 +35,7 @@ _extract(){
   echo -e "\e[1;33;40m Successfully extracted \e[0m"
 }
 ############################## progress indicator ##############################
-# usage:
-:<<'END'
-echo -n "\t\t     Installing......"
-spin
-echo ""
-END
 spinner=( Ooooo oOooo ooOoo oooOo ooooO oooOo ooOoo oOooo);
-# spinner=( '|' '/' '-' '\' )
 spin(){
   local pid=$!
   # while [ 1 ]
@@ -55,8 +48,6 @@ spin(){
     done
   done
 }
-
-# OS Check
 ################################################################################
 # If you are using CentOS7, the script will run, but if not, stop.
 if [ -f /etc/os-release ]; then
@@ -74,7 +65,6 @@ fi
 rpm -qa | grep libaio > /dev/null
 if [[ $? -eq 0 ]];then
   echo -e "\e[1;40m [libaio already installed] \e[0m"
-  echo ""
 else
   echo -e "\e[0;33;47m libaio was not found. Install libaio \e[0m"
   sudo yum install -y libaio >& /dev/null
@@ -268,7 +258,6 @@ else
   echo ""
 fi
 ############################# download MySQL 5.7 ###############################
-
 if [ $(url "${_list[0]}") == "0" ]; then                 # try
   sudo wget -P /tmp/ "${_list[0]}" -q & >& /dev/null
   echo "${_list[0]}"
@@ -302,7 +291,7 @@ sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR
 ############################### initialize mysql ###############################
 initialize_mysql() {
   echo -e "\e[1;32;40m[9] Install MySQL5.7 \e[0m"
-  cd $BASEDIR || { echo -e "\e[1;31;40m [Failed] \e[0m"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
+  cd $BASEDIR || { echo -e "\e[1;31;40m [cd Failed] \e[0m"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
   sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
   echo -en "\t\e[1;36;40m    Installing......\e[0m"
   spin  # progress indicator
@@ -352,7 +341,7 @@ help_usage(){
   echo "#############################################################################################"
   echo "# This password is a temporary password. Please make sure to change your password as below. #"
   echo "# - sudo $BASEDIR/bin/mysql -uroot -p'$password'                                             #"
-  echo "# - mysql> alter user 'root'@'localhost' identified by 'PASSWORD'                           #"
+  echo "# - mysql> alter user 'root'@'localhost' identified by 'PaSSWORD'                           #"
   echo "#############################################################################################"
 }
 
