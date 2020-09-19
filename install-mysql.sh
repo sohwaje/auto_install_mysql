@@ -17,12 +17,13 @@ declare -a _list # set in array
 _list=( "https://downloads.mysql.com/archives/get/p/23/file/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz"
 "http://ftp.kaist.ac.kr/mysql/Downloads/MySQL-5.7/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz"
 "http://ftp.jaist.ac.jp/pub/mysql/Downloads/MySQL-5.7/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz" )
-
 url()
 {
     if [ ! -z "$1" ]; then
         curl -Is "$1" | grep -w "200\|301\|302" >/dev/null 2>&1
-        [ "$?" -eq 0 ] && echo "0" || echo "1"
+        [ "$?" -eq 0 ] && echo "ok" || echo "fail"
+    else
+        exit 9
     fi
 }
 ############################## compress indicator ##############################
@@ -258,31 +259,23 @@ else
   echo ""
 fi
 ############################# download MySQL 5.7 ###############################
-if [ $(url "${_list[0]}") == "0" ]; then                 # try
-  sudo wget -P /tmp/ "${_list[0]}" -q & >& /dev/null
-  echo "${_list[0]}"
-  echo -en "\t\e[1;36;40m    Downloading.....\e[0m"
-  spin
-  echo ""
-elif [ $(url "${_list[1]}") == "0" ]; then               # retry
-  sudo wget -P /tmp/ "${_list[1]}" -q & >& /dev/null
-  echo "${_list[1]}"
-  echo -en "\t\e[1;36;40m    Downloading.....\e[0m"
-  spin
-  echo ""
-elif [ $(url "${_list[2]}") == "0" ]; then               #final try
-  sudo wget -P /tmp/ "${_list[2]}" -q & >& /dev/null
-  echo "${_list[2]}"
-  echo -en "\t\e[1;36;40m    Downloading.....\e[0m"
-  spin
-  echo ""
-else
-  echo -e "\e[1;31;40m [Download Failed] \e[0m"
-  exit 9
-fi
+for i in ${_list[@]}
+do
+  # url $URL >/dev/null 2>&1
+  if [[ $(url $i) == "ok" ]]; then
+    # echo "$i Download"
+    sudo wget -P /tmp/ "$i" -q & >& /dev/null
+    echo -en "\t\e[1;36;40m    Downloading.....\e[0m"
+    spin
+    echo ""
+    break
+  else
+    echo "Cannot download: $i"
+  fi
+done
 ################## extract mysql-5.7.31-linux-glibc2.12-x86_64 #################
 echo -e "\e[1;32;40m[8] Extracting mysql-5.7 \e[0m"
-cd /tmp/ || { echo -e "\e[1;31;40m [cd failed] \e[0m"; exit 1; }
+cd /tmp/ >& /dev/null || { echo -e "\e[1;31;40m [cd failed] \e[0m"; exit 1; }
 sudo tar xvfz $INSTALLFILE.tar.gz 2>&1 | _extract
 sudo mv $INSTALLFILE /usr/local/mysql && sudo rm -f $INSTALLFILE.tar.gz
 ################################# set permission ###############################
@@ -337,12 +330,14 @@ start_mysql() {
 }
 
 help_usage(){
-  echo ""
   echo "#############################################################################################"
   echo "# This password is a temporary password. Please make sure to change your password as below. #"
-  echo "# - sudo $BASEDIR/bin/mysql -uroot -p'$password'                                     #"
+  echo "# - sudo $BASEDIR/bin/mysql -uroot -p'$password'                                  #"
   echo "# - mysql> alter user 'root'@'localhost' identified by 'PaSSWORD'                           #"
   echo "#############################################################################################"
+  echo ""
+  echo "Install Success"
+  echo ""
 }
 
 initialize_mysql
