@@ -63,3 +63,69 @@ MYSQLD_PID_PATH="$DATADIR/mysql_data"
 `
 /etc/my.cnf
 `
+#
+# MySQL v5.7 Auto install script
+## MySQL5.7 binary Installation Script
+### [0] Introduction
+- This script automatically installs the MySQL5.7 binary version in a CentOS7 environment (not for dockers).
+- The script must be run early in the creation of the virtual machine. This is because you must install it without a sudo password.
+- You can copy and install this script to user-data.sh, which you use to create virtual machines, such as aws or Azure.
+- Although mysql is usually heavily used as a docker, this script can install MySQL5.7 at one time via a setup file that has already been customized.
+- When this script runs, the MySQL temporary root password is printed at the end. Please change the root password.
+
+### [1] How to use
+`
+./install-mysql.sh
+`
+### [2] Set variables
+> Set basic variable settings, MySQL data directory, MySQL engine directory, and MySQL log directory.
+
+> installation file :
+
+`
+INSTALLFILE="mysql-5.7.31-linux-glibc2.12-x86_64"
+`
+> MySQL engine path :
+
+`
+BASEDIR="/usr/local/mysql"
+`
+> MySQL installation root dir :
+
+`
+DATADIR="/data"
+`
+> MySQL Data directory path:
+
+`
+MYSQL_DATA="$DATADIR/mysql_data"
+`
+> MySQL Temporary directory path:
+
+`
+TMPDIR="$DATADIR/mysql_tmp"
+`
+> MySQL Log directory path:
+
+`
+LOGDIR="$DATADIR/mysql_log"
+`
+> MySQL execution account:
+
+`
+MYSQL_USER="mysql"
+`
+
+> MySQL PID path:
+
+`
+MYSQLD_PID_PATH="$DATADIR/mysql_data"
+`
+### [3] my.cnf
+- My.cnf files included in this script can be used as they are or modified to suit your environment.
+
+> my.cnf path :
+
+`
+/etc/my.cnf
+`
