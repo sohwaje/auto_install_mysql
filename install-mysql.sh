@@ -28,7 +28,7 @@ url()
 ############################## compress indicator ##############################
 # usage: tar xvfz *.tar.gz | _extract
 _extract(){
-  while read line; do
+  while read -r line; do
     x=$((x+1))
     echo -en "\e[1;36;40m [$x] extracted\r \e[0m"
   done
