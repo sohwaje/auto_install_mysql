@@ -63,12 +63,11 @@ if [ -f /etc/os-release ]; then
   fi
 fi
 ################# MySQL has a dependency on the libaio library #################
-rpm -qa | grep libaio > /dev/null
-if [[ $? -eq 0 ]];then
-  echo -e "\e[1;40m [libaio already installed] \e[0m"
-else
+if ! rpm -qa | grep libaio > /dev/null;then
   echo -e "\e[0;33;47m libaio was not found. Install libaio \e[0m"
   sudo yum install -y libaio
+else
+  echo -e "\e[1;40m [libaio already installed] \e[0m"
 fi
 ########################### Create a mysql User and Group ######################
 echo -e "\e[1;32;40m[1] Create a mysql User and Group \e[0m"
