@@ -68,8 +68,7 @@ if [[ $? -eq 0 ]];then
   echo -e "\e[1;40m [libaio already installed] \e[0m"
 else
   echo -e "\e[0;33;47m libaio was not found. Install libaio \e[0m"
-  sudo yum install -y libaio >& /dev/null
-  exit 9
+  sudo yum install -y libaio
 fi
 ########################### Create a mysql User and Group ######################
 echo -e "\e[1;32;40m[1] Create a mysql User and Group \e[0m"
