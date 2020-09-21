@@ -76,7 +76,7 @@ GROUP=`cat /etc/group | grep mysql | awk -F ':' '{print $1}'`
 if [[ $GROUP != $MYSQL_USER ]];then
   sudo groupadd $MYSQL_USER
 else
-  echo -e "\e[1;33;40m [$MYSQL_USER group already exits] \e[0m"
+  echo -e "\e[1;33;40m [$MYSQL_USER group already exist] \e[0m"
 fi
 # Check mysql user
 ACCOUNT=`cat /etc/passwd | grep $MYSQL_USER | awk -F ':' '{print $1}'`
