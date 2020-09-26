@@ -56,6 +56,7 @@ _extract(){
     x=$((x+1))
     echo -en "\e[1;36;40m [$x] extracted\r \e[0m"
   done
+  if t
   yellow "Successfully extracted"
 }
 ############################## progress indicator ##############################
@@ -313,7 +314,7 @@ initialize_mysql() {
   wait # 백그라운드 작업이 끝날 때까지 대기
   password=$(grep 'temporary password' $LOGDIR/mysql.err | awk '{print $11}')
   if [[ -z `cat $LOGDIR/mysql.err | grep -i "\[Error\]"` ]];then
-    yello "[Installed]"
+    yellow "[Installed]"
   else
     red "[Failed]"
     exit 9
