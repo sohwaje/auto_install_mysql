@@ -54,6 +54,7 @@ declare -a candidates_address # set in array
 candidates_address=( "https://downloads.mysql.com/archives/get/p/23/file/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz"
 "http://ftp.kaist.ac.kr/mysql/Downloads/MySQL-5.7/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz"
 "http://ftp.jaist.ac.jp/pub/mysql/Downloads/MySQL-5.7/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz" )
+
 url()
 {
     if [ ! -z "$1" ]; then
@@ -68,12 +69,13 @@ url()
 _extract(){
   while read -r line; do
     x=$((x+1))
-    echo -en "\e[1;36;40m [$x] extracted\r \e[0m"
+    echo -en "\e[1;36;40m[$x] extracted\r \e[0m"
   done
   yellow "Successfully extracted"
 }
 ############################## progress indicator ##############################
 spinner=( Ooooo oOooo ooOoo oooOo ooooO oooOo ooOoo oOooo);
+
 spin(){
   local pid=$!
   # while [ 1 ]
@@ -108,6 +110,7 @@ else
 fi
 ########################### Create a mysql User and Group ######################
 green "[1] Create a mysql User and Group"
+
 # Check mysql group
 GROUP=`cat /etc/group | grep mysql | awk -F ':' '{print $1}'`
 if [[ $GROUP != $MYSQL_USER ]];then
@@ -124,6 +127,7 @@ else
 fi
 ########################### Create a my.cnf into "/etc" ########################
 green "[2] Create a my.cnf"
+
 sudo bash -c "echo '# 4Core 8GB
 [client]
 port            = 3306
@@ -268,6 +272,7 @@ open-files-limit = 65535
 
 ################# make mysql dirs if no exits /usr/local/mysql #################
 green "[3] Create MySQL Base directory"
+
 sleep 1
 if [ ! -d $BASEDIR ];then
   yellow "[$BASEDIR directory dose not exist, Create New $BASEDIR directory]"
@@ -277,6 +282,7 @@ else
 fi
 ################ create mysql DATADIR if no exits /data ########################
 green "[4] Create a new mysql $DATADIR"
+
 sleep 1
 if [ ! -d $MYSQL_DATA ];then
   yellow "[MySQL directory does not exist, create MySQL directory]"
@@ -287,6 +293,7 @@ else
 fi
 ############################# create mysql files ###############################
 green "[6] Make MySQL files in /usr/local/mysql directory"
+
 sleep 1
 if [ ! -f $LOGDIR/mysql.err ];then
   sudo touch {"$LOGDIR/mysql.err","$LOGDIR/general_query.log","$LOGDIR/slowquery.log"}
@@ -310,7 +317,9 @@ do
 done
 ################## extract mysql-5.7.31-linux-glibc2.12-x86_64 #################
 green "[8] Extracting mysql-5.7"
+
 cd /tmp/ >& /dev/null || { red "[cd failed]"; exit 1; }
+
 if [ -f $INSTALLFILE.tar.gz ];then
   sudo tar xvfz $INSTALLFILE.tar.gz 2>&1 | _extract
   sudo mv $INSTALLFILE /usr/local/mysql && sudo rm -f $INSTALLFILE.tar.gz
