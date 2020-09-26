@@ -12,6 +12,29 @@ TMPDIR="$DATADIR/mysql_tmp"
 LOGDIR="$DATADIR/mysql_log"
 MYSQL_USER="mysql"
 MYSQLD_PID_PATH="$DATADIR/mysql_data"
+################################## color functions #############################
+# Color functions
+end="\033[0m"
+red="\033[0;31m"
+green="\033[0;32m"
+yellow="\033[0;33m"
+blue="\033[0;34m"
+
+function red {
+  echo -e "${red}${1}${end}"
+}
+
+function green {
+  echo -e "${green}${1}${end}"
+}
+
+function yellow {
+  echo -e "${yellow}${1}${end}"
+}
+
+function blue {
+  echo -e "${blue}${1}${end}"
+}
 ######################### MySQL Download site Check ############################
 declare -a candidates_address # set in array
 candidates_address=( "https://downloads.mysql.com/archives/get/p/23/file/mysql-5.7.30-linux-glibc2.12-x86_64.tar.gz"
@@ -33,7 +56,7 @@ _extract(){
     x=$((x+1))
     echo -en "\e[1;36;40m [$x] extracted\r \e[0m"
   done
-  echo -e "\e[1;33;40m Successfully extracted \e[0m"
+  yellow "Successfully extracted"
 }
 ############################## progress indicator ##############################
 spinner=( Ooooo oOooo ooOoo oooOo ooooO oooOo ooOoo oOooo);
@@ -53,40 +76,40 @@ spin(){
 # If you are using CentOS7, the script will run, but if not, stop.
 if [ -f /etc/os-release ]; then
   . /etc/os-release
-  OS=`echo $NAME | awk '{print $1}'`
-  VER=`echo $VERSION | awk '{print $1}'`
+  OS=$(echo $NAME | awk '{print $1}')
+  VER=$(echo $VERSION | awk '{print $1}')
   if [[ $OS == "CentOS" ]] && [[ $VER == "7" ]];then
-    echo -e "\e[0;30;47m [This Machine OS is $OS $VER] \e[0m"
+    yellow "[This Machine OS is $OS $VER]"
   else
-    echo -e "\e[0;31;47m [Failed : This Machine OS is not $OS $VER.] \e[0m"
+    red "[Failed : This Machine OS is not $OS $VER.]"
     exit 9
   fi
 fi
 ################# MySQL has a dependency on the libaio library #################
 if ! rpm -qa | grep libaio > /dev/null;then
-  echo -e "\e[0;33;47m libaio was not found. Install libaio \e[0m"
+  yellow "libaio was not found. Install libaio"
   sudo yum install -y libaio
 else
-  echo -e "\e[1;40m [libaio already installed] \e[0m"
+  yellow "[libaio already installed]"
 fi
 ########################### Create a mysql User and Group ######################
-echo -e "\e[1;32;40m[1] Create a mysql User and Group \e[0m"
+green "[1] Create a mysql User and Group"
 # Check mysql group
 GROUP=`cat /etc/group | grep mysql | awk -F ':' '{print $1}'`
 if [[ $GROUP != $MYSQL_USER ]];then
   sudo groupadd $MYSQL_USER
 else
-  echo -e "\e[1;33;40m [$MYSQL_USER group already exist] \e[0m"
+  yellow "[$MYSQL_USER group already exist]"
 fi
 # Check mysql user
 ACCOUNT=`cat /etc/passwd | grep $MYSQL_USER | awk -F ':' '{print $1}'`
 if [[ $ACCOUNT != $MYSQL_USER ]];then
   sudo useradd -r -g $MYSQL_USER -s /bin/false $MYSQL_USER
 else
-  echo -e "\e[1;33;40m [$MYSQL_USER user already exits] \e[0m"
+  yellow "[$MYSQL_USER user already exits]"
 fi
 ########################### Create a my.cnf into "/etc" ########################
-echo -e "\e[1;32;40m[2] Create a my.cnf \e[0m"
+green "[2] Create a my.cnf"
 sudo bash -c "echo '# 4Core 8GB
 [client]
 port            = 3306
@@ -230,26 +253,26 @@ open-files-limit = 65535
 ' > /etc/my.cnf"
 
 ################# make mysql dirs if no exits /usr/local/mysql #################
-echo -e "\e[1;32;40m[3] Create MySQL Base directory \e[0m"
+green "[3] Create MySQL Base directory"
 sleep 1
 if [ ! -d $BASEDIR ];then
-  echo -e "\e[1;40m [$BASEDIR directory dose not exist, Create New $BASEDIR directory] \e[0m"
+  yellow "[$BASEDIR directory dose not exist, Create New $BASEDIR directory]"
 else
-  echo "[$BASEDIR directory already exits, recreate New $BASEDIR directory]"
+  yellow "[$BASEDIR directory already exits, recreate New $BASEDIR directory]"
   sudo rm -rf $BASEDIR
 fi
 ################ create mysql DATADIR if no exits /data ########################
-echo -e "\e[1;32;40m[4] Create a new mysql $DATADIR \e[0m"
+green "[4] Create a new mysql $DATADIR"
 sleep 1
 if [ ! -d $MYSQL_DATA ];then
-  echo -e "\e[1;40m [MySQL directory does not exist, create MySQL directory] \e[0m"
+  yellow "[MySQL directory does not exist, create MySQL directory]"
   # sudo mkdir $DATADIR
   sudo mkdir -p {"$DATADIR","$MYSQL_DATA","$TMPDIR","$LOGDIR","$LOGDIR/mysql_binlog"}
 else
-  echo -e "\e[1;33;40m [MySQL directory does exist] \e[0m"
+  yellow "[MySQL directory does exist]"
 fi
 ############################# create mysql files ###############################
-echo -e "\e[1;32;40m[6] Make MySQL files in /usr/local/mysql directory \e[0m"
+green "[6] Make MySQL files in /usr/local/mysql directory"
 sleep 1
 if [ ! -f $LOGDIR/mysql.err ];then
   sudo touch {"$LOGDIR/mysql.err","$LOGDIR/general_query.log","$LOGDIR/slowquery.log"}
@@ -257,7 +280,7 @@ else
   echo ""
 fi
 ############################# download MySQL 5.7 ###############################
-for i in ${candidates_address[@]}
+for i in "${candidates_address[@]}"
 do
   # url $URL >/dev/null 2>&1
   if [[ $(url $i) == "ok" ]]; then
@@ -268,12 +291,12 @@ do
     echo ""
     break
   else
-    echo "Cannot download: $i"
+    red "Cannot download: $i"
   fi
 done
 ################## extract mysql-5.7.31-linux-glibc2.12-x86_64 #################
-echo -e "\e[1;32;40m[8] Extracting mysql-5.7 \e[0m"
-cd /tmp/ >& /dev/null || { echo -e "\e[1;31;40m [cd failed] \e[0m"; exit 1; }
+green "[8] Extracting mysql-5.7"
+cd /tmp/ >& /dev/null || { red "[cd failed]"; exit 1; }
 sudo tar xvfz $INSTALLFILE.tar.gz 2>&1 | _extract
 sudo mv $INSTALLFILE /usr/local/mysql && sudo rm -f $INSTALLFILE.tar.gz
 ################################# set permission ###############################
@@ -281,8 +304,8 @@ sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR
 
 ############################### initialize mysql ###############################
 initialize_mysql() {
-  echo -e "\e[1;32;40m[9] Install MySQL5.7 \e[0m"
-  cd $BASEDIR || { echo -e "\e[1;31;40m [cd Failed] \e[0m"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
+  green "[9] Install MySQL5.7"
+  cd $BASEDIR || { red "[cd Failed]"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
   sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
   echo -en "\t\e[1;36;40m    Installing......\e[0m"
   spin  # progress indicator
@@ -290,16 +313,16 @@ initialize_mysql() {
   wait # 백그라운드 작업이 끝날 때까지 대기
   password=$(grep 'temporary password' $LOGDIR/mysql.err | awk '{print $11}')
   if [[ -z `cat $LOGDIR/mysql.err | grep -i "\[Error\]"` ]];then
-    echo -e "\e[1;33;40m [Installed] \e[0m"
+    yello "[Installed]"
   else
-    echo -e "\e[1;31;40m [Failed] \e[0m"
+    red "[Failed]"
     exit 9
   fi
 }
 ########################### Get MySQL temporary password #######################
 temp_password() {
-  echo -e "\e[1;32;40m[10] MySQL temporary password \e[0m"
-  echo -e "\e[1;33;40m temporary password is : $password \e[0m"
+  green "[10] MySQL temporary password"
+  echo " temporary password is : $password"
 }
 ######################### Create MySQL start/stop script #######################
 create_start_script(){
