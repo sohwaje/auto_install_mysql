@@ -19,6 +19,7 @@ red="\033[0;31m"
 green="\033[0;32m"
 yellow="\033[0;33m"
 blue="\033[0;34m"
+purple="\033[0;35m"
 
 function red {
   echo -e "${red}${1}${end}"
@@ -34,6 +35,19 @@ function yellow {
 
 function blue {
   echo -e "${blue}${1}${end}"
+}
+
+function purple {
+  echo -e "${purple}${1}${end}"
+}
+############################## OK and Fail check ###############################
+ok_fail()
+{
+  if [[ $? -eq 0 ]];then
+    green "[OK]"
+  else
+    red "[Failed]"
+  fi
 }
 ######################### MySQL Download site Check ############################
 declare -a candidates_address # set in array
@@ -56,7 +70,6 @@ _extract(){
     x=$((x+1))
     echo -en "\e[1;36;40m [$x] extracted\r \e[0m"
   done
-  if t
   yellow "Successfully extracted"
 }
 ############################## progress indicator ##############################
@@ -80,7 +93,7 @@ if [ -f /etc/os-release ]; then
   OS=$(echo $NAME | awk '{print $1}')
   VER=$(echo $VERSION | awk '{print $1}')
   if [[ $OS == "CentOS" ]] && [[ $VER == "7" ]];then
-    yellow "[This Machine OS is $OS $VER]"
+    purple "[## This Machine OS is $OS $VER ##]"
   else
     red "[Failed : This Machine OS is not $OS $VER.]"
     exit 9
@@ -298,15 +311,20 @@ done
 ################## extract mysql-5.7.31-linux-glibc2.12-x86_64 #################
 green "[8] Extracting mysql-5.7"
 cd /tmp/ >& /dev/null || { red "[cd failed]"; exit 1; }
-sudo tar xvfz $INSTALLFILE.tar.gz 2>&1 | _extract
-sudo mv $INSTALLFILE /usr/local/mysql && sudo rm -f $INSTALLFILE.tar.gz
+if [ -f $INSTALLFILE.tar.gz ];then
+  sudo tar xvfz $INSTALLFILE.tar.gz 2>&1 | _extract
+  sudo mv $INSTALLFILE /usr/local/mysql && sudo rm -f $INSTALLFILE.tar.gz
+else
+  red "Does not exist $INSTALLFILE.tar.gz"
+  exit 1
+fi
 ################################# set permission ###############################
 sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR
 
 ############################### initialize mysql ###############################
 initialize_mysql() {
   green "[9] Install MySQL5.7"
-  cd $BASEDIR || { red "[cd Failed]"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
+  cd $BASEDIR >& /dev/null || { red "[cd Failed]"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
   sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
   echo -en "\t\e[1;36;40m    Installing......\e[0m"
   spin  # progress indicator
