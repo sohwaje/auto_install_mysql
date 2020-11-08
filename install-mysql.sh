@@ -316,7 +316,7 @@ do
   fi
 done
 ################## extract mysql-5.7.31-linux-glibc2.12-x86_64 #################
-green "[8] Extracting mysql-5.7"
+green "[7] Extracting mysql-5.7"
 
 cd /tmp/ >& /dev/null || { red "[cd failed]"; exit 1; }
 
@@ -332,7 +332,7 @@ sudo chown -R mysql.mysql $BASEDIR && sudo chown -R mysql.mysql $DATADIR
 
 ############################### initialize mysql ###############################
 initialize_mysql() {
-  green "[9] Install MySQL5.7"
+  green "[8] Install MySQL5.7"
   cd $BASEDIR &>/dev/null || { red "[cd Failed]"; exit 1; } # cd 명령이 실패하면 ["cd $BASEDIR failed"]를 출력
   sudo ./bin/mysqld --defaults-file=/etc/my.cnf --basedir=$BASEDIR --datadir=$MYSQL_DATA --initialize --user=mysql &
   echo -en "\t\e[1;36;40m    Installing......\e[0m"
@@ -349,7 +349,7 @@ initialize_mysql() {
 }
 ########################### Get MySQL temporary password #######################
 temp_password() {
-  green "[10] MySQL temporary password"
+  green "[9] MySQL temporary password"
   echo " temporary password is : $password"
 }
 ######################### Create MySQL start/stop script #######################
