@@ -8,12 +8,12 @@
 - 이 스크립트가 실행되면, 마지막에 MySQL 임시 루트 패스워드가 출력됩니다. 반드시 루트 패스워드를 변경해주세요.
 
 ### [1] 사용 방법
-`
-git clone https://github.com/sohwaje/auto_install_mysql.git
-cd auto_install_mysql
-chmod +x install-mysql.sh
+```
+git clone https://github.com/sohwaje/auto_install_mysql.git  
+cd auto_install_mysql  
+chmod +x install-mysql.sh  
 ./install-mysql.sh
-`
+```
 ### [2] Set variables
 > 기본적인 변수 설정, MySQL data 디렉토리, MySQL 엔진 디렉토리, MySQL 로그 디렉토리를 설정합니다.
 
@@ -77,9 +77,12 @@ MYSQLD_PID_PATH="$DATADIR/mysql_data"
 - When this script runs, the MySQL temporary root password is printed at the end. Please change the root password.
 
 ### [1] How to use
-`
+```
+git clone https://github.com/sohwaje/auto_install_mysql.git  
+cd auto_install_mysql  
+chmod +x install-mysql.sh  
 ./install-mysql.sh
-`
+```
 ### [2] Description variables
 > Set basic variable settings, MySQL data directory, MySQL engine directory, and MySQL log directory.
 
