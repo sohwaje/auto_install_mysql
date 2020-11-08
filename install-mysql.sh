@@ -292,7 +292,7 @@ else
   yellow "[MySQL directory does exist]"
 fi
 ############################# create mysql files ###############################
-green "[6] Make MySQL files in /usr/local/mysql directory"
+green "[6] Make MySQL files in /usr/local/mysql"
 
 sleep 1
 if [ ! -f $LOGDIR/mysql.err ];then
