@@ -9,6 +9,9 @@
 
 ### [1] 사용 방법
 `
+git clone https://github.com/sohwaje/auto_install_mysql.git
+cd auto_install_mysql
+chmod +x install-mysql.sh
 ./install-mysql.sh
 `
 ### [2] Set variables
