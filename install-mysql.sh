@@ -233,7 +233,7 @@ group_concat_max_len = 10M
 ## InnoDB Config
 innodb_adaptive_hash_index = 1
 innodb_buffer_pool_size = 4G #200G
-innodb_data_file_path = ibdata1:100M;ibdata2:100M;ibdata3:100M:autoextend #ibdata1:20G;ibdata2:20G;ibdata3:1G:autoextend
+innodb_data_file_path = ibdata1:100M;ibdata2:100M;ibdata3:100M:autoextend #ibdata1:1G;ibdata2:1G;ibdata3:1G:autoextend
 innodb_file_per_table
 innodb_data_home_dir = $MYSQL_DATA
 
